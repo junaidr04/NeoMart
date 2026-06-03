@@ -45,6 +45,20 @@ function Navbar() {
 
                 {user ? (
                     <>
+                        <Link
+                            to="/my-orders"
+                            className={`font-semibold text-sm px-4 py-2 rounded-full transition-all ${darkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}
+                        >
+                            My Orders
+                        </Link>
+                        {user.role === "admin" && (
+                            <Link
+                                to="/admin"
+                                className="bg-purple-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-purple-700 transition-all text-sm"
+                            >
+                                Admin Panel
+                            </Link>
+                        )}
                         <span className={`font-semibold ${darkMode ? "text-gray-200" : "text-gray-700"}`}>
                             Hi, {user.name.split(" ")[0]} 👋
                         </span>

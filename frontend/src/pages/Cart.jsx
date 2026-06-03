@@ -1,10 +1,13 @@
 import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Cart() {
     const { darkMode } = useTheme();
     const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <div className={`min-h-screen px-6 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
@@ -27,8 +30,14 @@ function Cart() {
                             key={item._id}
                             className={`flex items-center gap-4 p-5 rounded-2xl shadow-md mb-4 ${darkMode ? "bg-gray-800" : "bg-white"}`}
                         >
-                            <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-20 h-20 rounded-xl flex items-center justify-center text-4xl">
-                                📦
+                            <div className="w-20 h-20 rounded-xl overflow-hidden">
+                                {item.image ? (
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-full h-full flex items-center justify-center text-4xl">
+                                        📦
+                                    </div>
+                                )}
                             </div>
                             <div className="flex-1">
                                 <h3 className="font-bold text-lg">{item.name}</h3>
@@ -64,7 +73,10 @@ function Cart() {
                             <span className="text-xl font-bold">Total:</span>
                             <span className="text-2xl font-extrabold text-blue-600">${totalPrice.toFixed(2)}</span>
                         </div>
-                        <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-full font-bold text-lg hover:opacity-90 transition-all">
+                        <button
+                            onClick={() => user ? navigate("/checkout") : navigate("/login")}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-full font-bold text-lg hover:opacity-90 transition-all"
+                        >
                             Checkout →
                         </button>
                         <button

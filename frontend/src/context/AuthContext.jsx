@@ -18,7 +18,6 @@ export function AuthProvider({ children }) {
         setUser(res.data.user);
         return res.data;
     };
-
     const logout = async () => {
         await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
         setUser(null);

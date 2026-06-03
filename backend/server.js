@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./src/config/db");
 const authRoutes = require("./src/routes/authRoutes");
 const productRoutes = require("./src/routes/productRoutes");
+const orderRoutes = require("./src/routes/orderRoutes");
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(cookieParser());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
 
 app.get("/", (req, res) => {
   res.send("NeoMart API is running...");
