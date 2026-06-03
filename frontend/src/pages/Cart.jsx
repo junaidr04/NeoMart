@@ -4,92 +4,94 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Cart() {
-    const { darkMode } = useTheme();
-    const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
-    const { user } = useAuth();
-    const navigate = useNavigate();
+  const { darkMode } = useTheme();
+  const { cartItems, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-    return (
-        <div className={`min-h-screen px-6 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-            <h1 className="text-4xl font-extrabold text-center mb-12">Your Cart 🛒</h1>
+  return (
+    <div className={`min-h-screen px-6 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl font-black mb-2">Your Cart 🛒</h1>
+        <p className={`mb-10 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+          {cartItems.length} item{cartItems.length !== 1 ? "s" : ""} in your cart
+        </p>
 
-            {cartItems.length === 0 ? (
-                <div className="text-center">
-                    <p className="text-gray-400 text-lg mb-6">Your cart is empty!</p>
-                    <Link
-                        to="/products"
-                        className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition-all"
-                    >
-                        Shop Now
-                    </Link>
+        {cartItems.length === 0 ? (
+          <div className={`text-center py-20 rounded-3xl ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+            <p className="text-7xl mb-6">🛒</p>
+            <h2 className="text-2xl font-black mb-3">Your cart is empty!</h2>
+            <p className={`mb-8 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>Add some products to get started</p>
+            <Link to="/products" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full font-bold hover:opacity-90 transition-all">
+              Shop Now →
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Cart Items */}
+            <div className="flex-1 flex flex-col gap-4">
+              {cartItems.map(item => (
+                <div key={item._id} className={`flex items-center gap-4 p-5 rounded-3xl border card-hover ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
+                    {item.image ? (
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-full h-full flex items-center justify-center text-3xl">📦</div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-base truncate">{item.name}</h3>
+                    <p className="text-blue-600 font-bold">${item.price}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button onClick={() => updateQuantity(item._id, item.quantity - 1)} className={`w-9 h-9 rounded-full font-black text-lg transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}>-</button>
+                    <span className="font-black w-6 text-center">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item._id, item.quantity + 1)} className={`w-9 h-9 rounded-full font-black text-lg transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}>+</button>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <p className="font-black text-blue-600">${(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                  <button onClick={() => removeFromCart(item._id)} className="text-red-400 hover:text-red-600 font-black text-xl flex-shrink-0 transition-all hover:scale-110">✕</button>
                 </div>
-            ) : (
-                <div className="max-w-3xl mx-auto">
-                    {cartItems.map(item => (
-                        <div
-                            key={item._id}
-                            className={`flex items-center gap-4 p-5 rounded-2xl shadow-md mb-4 ${darkMode ? "bg-gray-800" : "bg-white"}`}
-                        >
-                            <div className="w-20 h-20 rounded-xl overflow-hidden">
-                                {item.image ? (
-                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-full h-full flex items-center justify-center text-4xl">
-                                        📦
-                                    </div>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-bold text-lg">{item.name}</h3>
-                                <p className="text-blue-600 font-bold">${item.price}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                                    className="bg-gray-200 text-gray-800 w-8 h-8 rounded-full font-bold hover:bg-gray-300"
-                                >
-                                    -
-                                </button>
-                                <span className="font-bold w-6 text-center">{item.quantity}</span>
-                                <button
-                                    onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                                    className="bg-gray-200 text-gray-800 w-8 h-8 rounded-full font-bold hover:bg-gray-300"
-                                >
-                                    +
-                                </button>
-                            </div>
-                            <button
-                                onClick={() => removeFromCart(item._id)}
-                                className="text-red-500 hover:text-red-700 font-bold text-xl"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                    ))}
+              ))}
+            </div>
 
-                    {/* Total */}
-                    <div className={`p-6 rounded-2xl shadow-md mt-6 ${darkMode ? "bg-gray-800" : "bg-white"}`}>
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-xl font-bold">Total:</span>
-                            <span className="text-2xl font-extrabold text-blue-600">${totalPrice.toFixed(2)}</span>
-                        </div>
-                        <button
-                            onClick={() => user ? navigate("/checkout") : navigate("/login")}
-                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-full font-bold text-lg hover:opacity-90 transition-all"
-                        >
-                            Checkout →
-                        </button>
-                        <button
-                            onClick={clearCart}
-                            className="w-full mt-3 text-red-500 hover:text-red-700 font-semibold"
-                        >
-                            Clear Cart
-                        </button>
+            {/* Order Summary */}
+            <div className="lg:w-80">
+              <div className={`p-6 rounded-3xl border sticky top-24 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+                <h2 className="text-xl font-black mb-6">Order Summary</h2>
+                <div className="flex flex-col gap-3 mb-6">
+                  <div className="flex justify-between">
+                    <span className={darkMode ? "text-gray-400" : "text-gray-500"}>Subtotal</span>
+                    <span className="font-bold">${totalPrice.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className={darkMode ? "text-gray-400" : "text-gray-500"}>Delivery</span>
+                    <span className="font-bold text-green-500">Free</span>
+                  </div>
+                  <div className={`border-t pt-3 ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
+                    <div className="flex justify-between">
+                      <span className="font-black text-lg">Total</span>
+                      <span className="font-black text-xl text-blue-600">${totalPrice.toFixed(2)}</span>
                     </div>
+                  </div>
                 </div>
-            )}
-        </div>
-    );
+                <button
+                  onClick={() => user ? navigate("/checkout") : navigate("/login")}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all hover:scale-105 shadow-lg"
+                >
+                  Checkout →
+                </button>
+                <button onClick={clearCart} className="w-full mt-3 text-red-500 hover:text-red-700 font-bold py-2 transition-all">
+                  Clear Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default Cart;

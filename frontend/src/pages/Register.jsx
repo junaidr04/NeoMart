@@ -4,80 +4,135 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 
 function Register() {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const { register } = useAuth();
-    const { darkMode } = useTheme();
-    const navigate = useNavigate();
+  const { register } = useAuth();
+  const { darkMode } = useTheme();
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        try {
-            const name = firstName + " " + lastName;
-            await register(name, email, password);
-            navigate("/login");
-        } catch (err) {
-            setError(err.response?.data?.message || "Registration failed");
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const name = firstName + " " + lastName;
+      await register(name, email, password);
+      navigate("/login");
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    }
+    setLoading(false);
+  };
 
-    return (
-        <div className={`flex items-center justify-center min-h-screen ${darkMode ? "bg-gray-800" : "bg-gray-100"}`}>
-            <div className={`p-8 rounded-lg shadow-md w-full max-w-md ${darkMode ? "bg-gray-900 text-white" : "bg-white"}`}>
-                <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">Register</h2>
-                {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <div className="flex gap-3">
-                        <input
-                            type="text"
-                            placeholder="First Name"
-                            className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 w-1/2 ${darkMode ? "bg-gray-700 text-white border-gray-600" : ""}`}
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Last Name"
-                            className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 w-1/2 ${darkMode ? "bg-gray-700 text-white border-gray-600" : ""}`}
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-                        />
-                    </div>
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 text-white border-gray-600" : ""}`}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 text-white border-gray-600" : ""}`}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                        type="submit"
-                        className="bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
-                    >
-                        Register
-                    </button>
-                </form>
-                <p className={`text-center mt-4 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-                    Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600 font-semibold hover:underline">
-                        Login
-                    </Link>
-                </p>
-            </div>
+  return (
+    <div className={`min-h-screen flex ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-600 via-purple-700 to-indigo-900"></div>
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 left-20 w-64 h-64 bg-pink-400 rounded-full filter blur-3xl animate-pulse-slow"></div>
+          <div className="absolute bottom-20 right-20 w-80 h-80 bg-purple-400 rounded-full filter blur-3xl animate-pulse-slow delay-300"></div>
         </div>
-    );
+        <div className="relative z-10 flex flex-col items-center justify-center w-full p-12 text-white">
+          <Link to="/" className="text-4xl font-black mb-8 bg-gradient-to-r from-white to-pink-200 bg-clip-text text-transparent">
+            NeoMart
+          </Link>
+          <h2 className="text-3xl font-black mb-4 text-center">Join NeoMart!</h2>
+          <p className="text-pink-200 text-center text-lg leading-relaxed max-w-sm">
+            Create your free account and start shopping thousands of premium products today.
+          </p>
+          <div className="mt-12 grid grid-cols-2 gap-4 w-full max-w-xs">
+            {["🚀 Fast Delivery", "🔒 Secure Pay", "↩️ Easy Returns", "🎯 Best Prices"].map((item, i) => (
+              <div key={i} className="glass rounded-2xl p-4 text-center text-sm font-semibold">{item}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className={`w-full lg:w-1/2 flex items-center justify-center p-8 ${darkMode ? "bg-gray-900" : "bg-white"}`}>
+        <div className="w-full max-w-md animate-fadeInUp">
+          <div className="lg:hidden text-center mb-8">
+            <Link to="/" className="text-3xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              NeoMart
+            </Link>
+          </div>
+          <h1 className={`text-3xl font-black mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}>
+            Create Account ✨
+          </h1>
+          <p className={`mb-8 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600 font-bold hover:underline">Sign in</Link>
+          </p>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl mb-6 text-sm font-semibold animate-fadeIn">
+              ⚠️ {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>First Name</label>
+                <input
+                  type="text"
+                  placeholder="John"
+                  className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 transition-all font-medium ${darkMode ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Last Name</label>
+                <input
+                  type="text"
+                  placeholder="Doe"
+                  className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 transition-all font-medium ${darkMode ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Email Address</label>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 transition-all font-medium ${darkMode ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 transition-all font-medium ${darkMode ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-gradient-to-r from-pink-600 to-purple-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all hover:scale-105 mt-2 shadow-lg disabled:opacity-50 disabled:scale-100"
+            >
+              {loading ? "Creating Account..." : "Create Account →"}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Register;
