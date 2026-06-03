@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const categoryEmoji = {
@@ -28,6 +29,7 @@ function getEmoji(product) {
 function Products() {
     const { darkMode } = useTheme();
     const { addToCart } = useCart();
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [added, setAdded] = useState({});
@@ -43,7 +45,8 @@ function Products() {
             .catch(() => setLoading(false));
     }, []);
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = (e, product) => {
+        e.stopPropagation();
         addToCart(product);
         setAdded(prev => ({ ...prev, [product._id]: true }));
         setTimeout(() => {
@@ -108,7 +111,8 @@ function Products() {
                     {filtered.map(product => (
                         <div
                             key={product._id}
-                            className={`rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all hover:-translate-y-1 ${darkMode ? "bg-gray-800" : "bg-white"}`}
+                            onClick={() => navigate(`/products/${product._id}`)}
+                            className={`rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer ${darkMode ? "bg-gray-800" : "bg-white"}`}
                         >
                             <div className="h-48 overflow-hidden">
                                 {product.image ? (
@@ -140,7 +144,7 @@ function Products() {
                                 <div className="flex justify-between items-center">
                                     <span className="text-blue-600 font-extrabold text-xl">${product.price}</span>
                                     <button
-                                        onClick={() => handleAddToCart(product)}
+                                        onClick={(e) => handleAddToCart(e, product)}
                                         className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${added[product._id]
                                                 ? "bg-green-500 text-white"
                                                 : "bg-blue-600 text-white hover:bg-blue-700"
