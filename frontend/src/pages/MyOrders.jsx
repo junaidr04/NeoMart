@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
+import api from "../api";
 function MyOrders() {
     const { darkMode } = useTheme();
     const { user } = useAuth();
@@ -16,11 +15,10 @@ function MyOrders() {
             navigate("/login");
             return;
         }
-        axios.get("http://localhost:5000/api/orders/myorders", { withCredentials: true })
-            .then(res => {
-                setOrders(res.data);
-                setLoading(false);
-            })
+        api.get("/orders/myorders").then(res => {
+            setOrders(res.data);
+            setLoading(false);
+        })
             .catch(() => setLoading(false));
     }, [user]);
 

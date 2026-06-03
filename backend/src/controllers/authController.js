@@ -51,6 +51,7 @@ const loginUser = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
@@ -70,4 +71,20 @@ const logoutUser = (req, res) => {
   res.json({ message: "Logged out successfully" });
 };
 
-module.exports = { registerUser, loginUser, logoutUser };
+// Get current user
+const getMe = async (req, res) => {
+  try {
+    res.json({
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, logoutUser, getMe };

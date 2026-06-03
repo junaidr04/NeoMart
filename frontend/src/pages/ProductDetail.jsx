@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
-import axios from "axios";
-
+import api from "../api";
 function ProductDetail() {
     const { id } = useParams();
     const { darkMode } = useTheme();
@@ -14,11 +13,10 @@ function ProductDetail() {
     const [added, setAdded] = useState(false);
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/api/products/${id}`)
-            .then(res => {
-                setProduct(res.data);
-                setLoading(false);
-            })
+        api.get(`/products/${id}`).then(res => {
+            setProduct(res.data);
+            setLoading(false);
+        })
             .catch(() => setLoading(false));
     }, [id]);
 
@@ -64,8 +62,8 @@ function ProductDetail() {
                             />
                         ) : (
                             <div className={`h-full flex items-center justify-center text-9xl ${product.category === "Electronics"
-                                    ? "bg-gradient-to-br from-blue-100 to-indigo-100"
-                                    : "bg-gradient-to-br from-pink-100 to-purple-100"
+                                ? "bg-gradient-to-br from-blue-100 to-indigo-100"
+                                : "bg-gradient-to-br from-pink-100 to-purple-100"
                                 }`}>
                                 📦
                             </div>
@@ -76,8 +74,8 @@ function ProductDetail() {
                     <div className="md:w-1/2 p-8 flex flex-col justify-between">
                         <div>
                             <span className={`text-xs font-semibold px-3 py-1 rounded-full ${product.category === "Electronics"
-                                    ? "bg-blue-100 text-blue-600"
-                                    : "bg-pink-100 text-pink-600"
+                                ? "bg-blue-100 text-blue-600"
+                                : "bg-pink-100 text-pink-600"
                                 }`}>
                                 {product.category}
                             </span>
@@ -98,8 +96,8 @@ function ProductDetail() {
                                 onClick={handleAddToCart}
                                 disabled={product.stock === 0}
                                 className={`flex-1 py-4 rounded-full font-bold text-lg transition-all ${added
-                                        ? "bg-green-500 text-white"
-                                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90"
                                     }`}
                             >
                                 {added ? "✓ Added to Cart!" : "Add to Cart 🛒"}

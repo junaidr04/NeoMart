@@ -3,8 +3,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
+import api from "../api";
 function Checkout() {
     const { darkMode } = useTheme();
     const { cartItems, totalPrice, clearCart } = useCart();
@@ -43,12 +42,7 @@ function Checkout() {
                 image: item.image
             }));
 
-            await axios.post(
-                "http://localhost:5000/api/orders",
-                { items, shippingAddress: form, totalPrice },
-                { withCredentials: true }
-            );
-
+            await api.post("/orders", { items, shippingAddress: form, totalPrice });
             clearCart();
             navigate("/order-success");
         } catch (err) {

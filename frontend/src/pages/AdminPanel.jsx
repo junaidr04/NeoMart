@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api";
 
 function AdminPanel() {
     const { darkMode } = useTheme();
@@ -28,13 +28,13 @@ function AdminPanel() {
     }, [user]);
 
     const fetchProducts = async () => {
-        const res = await axios.get("http://localhost:5000/api/products");
+        const res = await api.get("/products");
         setProducts(res.data);
         setLoading(false);
     };
 
     const fetchOrders = async () => {
-        const res = await axios.get("http://localhost:5000/api/orders", { withCredentials: true });
+        const res = await api.get("/orders");
         setOrders(res.data);
     };
 
@@ -42,9 +42,9 @@ function AdminPanel() {
         e.preventDefault();
         try {
             if (editProduct) {
-                await axios.put(`http://localhost:5000/api/products/${editProduct._id}`, form, { withCredentials: true });
+                await api.put(`/products/${editProduct._id}`, form);
             } else {
-                await axios.post("http://localhost:5000/api/products", form, { withCredentials: true });
+                await api.post("/products", form);
             }
             setShowForm(false);
             setEditProduct(null);
@@ -70,16 +70,12 @@ function AdminPanel() {
 
     const handleDelete = async (id) => {
         if (!window.confirm("Delete this product?")) return;
-        await axios.delete(`http://localhost:5000/api/products/${id}`, { withCredentials: true });
+        await api.delete(`/products/${id}`);
         fetchProducts();
     };
 
     const handleStatusUpdate = async (orderId, status) => {
-        await axios.put(
-            `http://localhost:5000/api/orders/${orderId}`,
-            { status },
-            { withCredentials: true }
-        );
+        await api.put(`/orders/${orderId}`, { status });
         fetchOrders();
     };
 
@@ -95,10 +91,8 @@ function AdminPanel() {
         <div className={`min-h-screen px-6 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
             <div className="max-w-6xl mx-auto">
 
-                {/* Header */}
                 <h1 className="text-4xl font-extrabold mb-8">Admin Panel 🛠️</h1>
 
-                {/* Tabs */}
                 <div className="flex gap-3 mb-8">
                     <button
                         onClick={() => setActiveTab("products")}
@@ -120,7 +114,6 @@ function AdminPanel() {
                     </button>
                 </div>
 
-                {/* Products Tab */}
                 {activeTab === "products" && (
                     <>
                         <div className="flex justify-between items-center mb-6">
@@ -198,7 +191,6 @@ function AdminPanel() {
                     </>
                 )}
 
-                {/* Orders Tab */}
                 {activeTab === "orders" && (
                     <div className="flex flex-col gap-6">
                         {orders.length === 0 ? (
