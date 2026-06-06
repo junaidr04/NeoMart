@@ -39,14 +39,10 @@ function Products() {
   useEffect(() => {
     api.get("/products")
       .then(res => {
-        console.log("Products:", res.data);
         setProducts(res.data);
         setLoading(false);
       })
-      .catch(err => {
-        console.error("Error:", err);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
 
   const handleAddToCart = (e, product) => {
@@ -63,6 +59,28 @@ function Products() {
     .filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
   const categories = ["All", "Electronics", "Fashion", "Laptops", "Mobiles", "Headphones", "Mouse", "Keyboard"];
+
+  const categoryLabel = {
+    "All": "🛍️ All",
+    "Electronics": "⚡ Electronics",
+    "Fashion": "👗 Fashion",
+    "Laptops": "💻 Laptops",
+    "Mobiles": "📱 Mobiles",
+    "Headphones": "🎧 Headphones",
+    "Mouse": "🖱️ Mouse",
+    "Keyboard": "⌨️ Keyboard"
+  };
+
+  const categoryBadgeColor = {
+    "Electronics": "bg-blue-600/90",
+    "Fashion": "bg-pink-600/90",
+    "Laptops": "bg-indigo-600/90",
+    "Mobiles": "bg-purple-600/90",
+    "Headphones": "bg-orange-600/90",
+    "Mouse": "bg-green-600/90",
+    "Keyboard": "bg-red-600/90"
+  };
+
   return (
     <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
 
@@ -80,8 +98,6 @@ function Products() {
           <p className="text-blue-100 text-lg mb-8 animate-fadeInUp delay-100">
             Discover premium products at unbeatable prices
           </p>
-
-          {/* Search Bar */}
           <div className="flex justify-center animate-fadeInUp delay-200">
             <div className="flex items-center gap-3 px-5 py-4 rounded-full shadow-2xl w-full max-w-lg glass">
               <span className="text-xl">🔍</span>
@@ -100,34 +116,28 @@ function Products() {
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div className={`py-6 px-6 sticky top-16 z-40 ${darkMode ? "bg-gray-900/95" : "bg-gray-50/95"} backdrop-blur-md`}>
-        <div className="flex justify-center gap-3 max-w-4xl mx-auto">
+      {/* Category Filter - horizontally scrollable */}
+      <div className={`py-4 px-4 sticky top-16 z-40 ${darkMode ? "bg-gray-900/95" : "bg-gray-50/95"} backdrop-blur-md`}>
+        <div className="flex gap-2 overflow-x-auto pb-1 max-w-7xl mx-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${activeCategory === cat
-                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105"
-                : darkMode
-                  ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  : "bg-white text-gray-600 hover:bg-gray-100 shadow-sm"
+              className={`px-4 py-2 rounded-full font-bold text-xs whitespace-nowrap flex-shrink-0 transition-all duration-300 ${activeCategory === cat
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105"
+                  : darkMode
+                    ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    : "bg-white text-gray-600 hover:bg-gray-100 shadow-sm"
                 }`}
             >
-              {cat === "All" ? "🛍️ All" :
-                cat === "Electronics" ? "⚡ Electronics" :
-                  cat === "Fashion" ? "👗 Fashion" :
-                    cat === "Laptops" ? "💻 Laptops" :
-                      cat === "Mobiles" ? "📱 Mobiles" :
-                        cat === "Headphones" ? "🎧 Headphones" :
-                          cat === "Mouse" ? "🖱️ Mouse" :
-                            "⌨️ Keyboard"}            </button>
+              {categoryLabel[cat]}
+            </button>
           ))}
         </div>
       </div>
 
       {/* Products Grid */}
-      <div className="px-6 py-12">
+      <div className="px-4 py-8">
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -138,19 +148,18 @@ function Products() {
             <p className={`text-xl font-semibold ${darkMode ? "text-gray-400" : "text-gray-500"}`}>No products found.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
             {filtered.map((product, i) => (
               <div
                 key={product._id}
                 onClick={() => navigate(`/products/${product._id}`)}
-                className={`group rounded-3xl overflow-hidden card-hover cursor-pointer border ${darkMode
-                  ? "bg-gray-800 border-gray-700 hover:border-blue-500"
-                  : "bg-white border-gray-100 hover:border-blue-300"
+                className={`group rounded-2xl overflow-hidden card-hover cursor-pointer border ${darkMode
+                    ? "bg-gray-800 border-gray-700 hover:border-blue-500"
+                    : "bg-white border-gray-100 hover:border-blue-300"
                   }`}
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
-                {/* Image */}
-                <div className="relative h-52 overflow-hidden">
+                <div className="relative h-40 overflow-hidden">
                   {product.image ? (
                     <img
                       src={product.image}
@@ -158,40 +167,32 @@ function Products() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
-                    <div className={`h-full flex items-center justify-center text-7xl ${product.category === "Electronics"
-                      ? "bg-gradient-to-br from-blue-100 to-indigo-100"
-                      : "bg-gradient-to-br from-pink-100 to-purple-100"
-                      }`}>
+                    <div className="h-full flex items-center justify-center text-5xl bg-gradient-to-br from-blue-100 to-indigo-100">
                       {getEmoji(product)}
                     </div>
                   )}
-                  {/* Category badge */}
-                  <div className="absolute top-3 left-3">
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm ${product.category === "Electronics"
-                      ? "bg-blue-600/90 text-white"
-                      : "bg-pink-600/90 text-white"
-                      }`}>
+                  <div className="absolute top-2 left-2">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full text-white ${categoryBadgeColor[product.category] || "bg-blue-600/90"}`}>
                       {product.category}
                     </span>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-5">
-                  <h3 className="font-bold text-base mb-1 line-clamp-1">{product.name}</h3>
-                  <p className={`text-xs mb-4 line-clamp-2 leading-relaxed ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                <div className="p-3">
+                  <h3 className="font-bold text-sm mb-1 line-clamp-1">{product.name}</h3>
+                  <p className={`text-xs mb-3 line-clamp-2 leading-relaxed ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                     {product.description}
                   </p>
                   <div className="flex justify-between items-center">
-                    <span className="text-blue-600 font-black text-xl">${product.price}</span>
+                    <span className="text-blue-600 font-black text-base">${product.price}</span>
                     <button
                       onClick={(e) => handleAddToCart(e, product)}
-                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 ${added[product._id]
-                        ? "bg-green-500 text-white scale-95"
-                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90 hover:scale-105"
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${added[product._id]
+                          ? "bg-green-500 text-white"
+                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90"
                         }`}
                     >
-                      {added[product._id] ? "✓ Added!" : "+ Cart"}
+                      {added[product._id] ? "✓" : "+ Cart"}
                     </button>
                   </div>
                 </div>
