@@ -5,19 +5,19 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import api from "../api";
 
-function StarRating({ rating, onRate, interactive = false }) {
+function StarRating({ rating, onRate }) {
     const [hover, setHover] = useState(0);
     return (
         <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map(star => (
                 <button
                     key={star}
-                    onClick={() => interactive && onRate(star)}
-                    onMouseEnter={() => interactive && setHover(star)}
-                    onMouseLeave={() => interactive && setHover(0)}
-                    className={`text-2xl transition-all ${interactive ? "cursor-pointer hover:scale-110" : "cursor-default"}`}
+                    onClick={() => onRate && onRate(star)}
+                    onMouseEnter={() => onRate && setHover(star)}
+                    onMouseLeave={() => onRate && setHover(0)}
+                    className="text-2xl transition-transform hover:scale-110"
                 >
-                    {star <= (hover || rating) ? "⭐" : "☆"}
+                    <span className={star <= (hover || rating) ? "text-yellow-400" : "text-gray-300"}>★</span>
                 </button>
             ))}
         </div>
@@ -36,7 +36,7 @@ function ProductDetail() {
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
-    const [reviewLoading, setReviewLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [reviewError, setReviewError] = useState("");
 
     useEffect(() => {
@@ -48,7 +48,8 @@ function ProductDetail() {
             .catch(() => setLoading(false));
 
         api.get(`/products/${id}/reviews`)
-            .then(res => setReviews(res.data));
+            .then(res => setReviews(res.data))
+            .catch(() => { });
     }, [id]);
 
     const handleAddToCart = () => {
@@ -59,17 +60,17 @@ function ProductDetail() {
 
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
-        setReviewLoading(true);
+        setSubmitting(true);
         setReviewError("");
         try {
             const res = await api.post(`/products/${id}/reviews`, { rating, comment });
-            setReviews([res.data, ...reviews]);
+            setReviews(prev => [res.data, ...prev]);
             setComment("");
             setRating(5);
         } catch (err) {
             setReviewError(err.response?.data?.message || "Failed to submit review");
         }
-        setReviewLoading(false);
+        setSubmitting(false);
     };
 
     const avgRating = reviews.length > 0
@@ -89,19 +90,19 @@ function ProductDetail() {
     );
 
     return (
-        <div className={`min-h-screen px-4 py-8 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-            <div className="max-w-5xl mx-auto">
+        <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+            <div className="max-w-5xl mx-auto px-4 py-12">
 
                 {/* Back button */}
                 <button
                     onClick={() => navigate(-1)}
-                    className={`mb-6 flex items-center gap-2 font-semibold hover:text-blue-500 transition-colors ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+                    className={`mb-8 flex items-center gap-2 font-semibold hover:text-blue-500 transition-colors ${darkMode ? "text-gray-300" : "text-gray-600"}`}
                 >
                     ← Back
                 </button>
 
                 {/* Product Card */}
-                <div className={`rounded-3xl overflow-hidden shadow-xl flex flex-col md:flex-row mb-10 ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+                <div className={`rounded-3xl overflow-hidden shadow-xl flex flex-col md:flex-row mb-12 ${darkMode ? "bg-gray-800" : "bg-white"}`}>
                     <div className="md:w-1/2 h-72 md:h-auto overflow-hidden">
                         {product.image ? (
                             <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
@@ -118,12 +119,14 @@ function ProductDetail() {
                             </span>
                             <h1 className="text-3xl font-extrabold mt-4 mb-2">{product.name}</h1>
 
-                            {/* Rating summary */}
-                            <div className="flex items-center gap-2 mb-4">
-                                <StarRating rating={Math.round(avgRating)} />
-                                <span className="font-bold text-lg">{avgRating}</span>
-                                <span className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>({reviews.length} reviews)</span>
-                            </div>
+                            {/* Rating display */}
+                            {reviews.length > 0 && (
+                                <div className="flex items-center gap-2 mb-3">
+                                    <StarRating rating={Math.round(avgRating)} />
+                                    <span className="font-bold text-yellow-500">{avgRating}</span>
+                                    <span className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>({reviews.length} reviews)</span>
+                                </div>
+                            )}
 
                             <p className={`text-sm mb-6 leading-relaxed ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                                 {product.description}
@@ -141,7 +144,7 @@ function ProductDetail() {
                             disabled={product.stock === 0}
                             className={`w-full py-4 rounded-full font-bold text-lg transition-all ${added
                                     ? "bg-green-500 text-white"
-                                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90"
+                                    : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90 hover:scale-105"
                                 }`}
                         >
                             {added ? "✓ Added to Cart!" : "Add to Cart 🛒"}
@@ -151,37 +154,41 @@ function ProductDetail() {
 
                 {/* Reviews Section */}
                 <div className={`rounded-3xl p-8 ${darkMode ? "bg-gray-800" : "bg-white"} shadow-lg`}>
-                    <h2 className="text-2xl font-black mb-6">Customer Reviews ⭐</h2>
+                    <h2 className="text-2xl font-black mb-8">
+                        Customer Reviews {reviews.length > 0 && <span className="text-blue-600">({reviews.length})</span>}
+                    </h2>
 
                     {/* Add Review Form */}
                     {user ? (
-                        <form onSubmit={handleReviewSubmit} className={`p-6 rounded-2xl mb-8 ${darkMode ? "bg-gray-700" : "bg-gray-50"}`}>
+                        <form onSubmit={handleReviewSubmit} className={`p-6 rounded-2xl mb-8 border ${darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-100"}`}>
                             <h3 className="font-bold text-lg mb-4">Write a Review</h3>
                             {reviewError && <p className="text-red-500 text-sm mb-3">{reviewError}</p>}
                             <div className="mb-4">
-                                <label className="text-sm font-semibold mb-2 block">Your Rating</label>
-                                <StarRating rating={rating} onRate={setRating} interactive={true} />
+                                <label className={`text-sm font-semibold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-600"}`}>Your Rating</label>
+                                <StarRating rating={rating} onRate={setRating} />
                             </div>
                             <textarea
-                                placeholder="Share your experience..."
+                                placeholder="Share your experience with this product..."
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 resize-none h-28 ${darkMode ? "bg-gray-600 border-gray-500 text-white placeholder-gray-400" : "border-gray-200"
-                                    }`}
+                                className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 resize-none h-28 font-medium ${darkMode ? "bg-gray-600 border-gray-500 text-white placeholder-gray-400" : "border-gray-200 placeholder-gray-400"}`}
                                 required
                             />
                             <button
                                 type="submit"
-                                disabled={reviewLoading}
-                                className="mt-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:opacity-90 transition-all"
+                                disabled={submitting}
+                                className="mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:opacity-90 transition-all disabled:opacity-50"
                             >
-                                {reviewLoading ? "Submitting..." : "Submit Review →"}
+                                {submitting ? "Submitting..." : "Submit Review →"}
                             </button>
                         </form>
                     ) : (
-                        <div className={`p-6 rounded-2xl mb-8 text-center ${darkMode ? "bg-gray-700" : "bg-gray-50"}`}>
-                            <p className={`mb-3 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>Login to write a review</p>
-                            <button onClick={() => navigate("/login")} className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700">
+                        <div className={`p-6 rounded-2xl mb-8 text-center border ${darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-100"}`}>
+                            <p className={`mb-4 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>Login to write a review</p>
+                            <button
+                                onClick={() => navigate("/login")}
+                                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:opacity-90"
+                            >
                                 Login →
                             </button>
                         </div>
@@ -189,25 +196,24 @@ function ProductDetail() {
 
                     {/* Reviews List */}
                     {reviews.length === 0 ? (
-                        <p className={`text-center py-8 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                            No reviews yet. Be the first to review!
-                        </p>
+                        <div className="text-center py-12">
+                            <p className="text-5xl mb-4">💬</p>
+                            <p className={`text-lg font-semibold ${darkMode ? "text-gray-400" : "text-gray-500"}`}>No reviews yet. Be the first!</p>
+                        </div>
                     ) : (
                         <div className="flex flex-col gap-4">
                             {reviews.map(review => (
-                                <div key={review._id} className={`p-5 rounded-2xl border ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
+                                <div key={review._id} className={`p-5 rounded-2xl border ${darkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-100"}`}>
                                     <div className="flex justify-between items-start mb-2">
                                         <div>
                                             <p className="font-bold">{review.name}</p>
                                             <StarRating rating={review.rating} />
                                         </div>
-                                        <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                        <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-400"}`}>
                                             {new Date(review.createdAt).toLocaleDateString()}
                                         </p>
                                     </div>
-                                    <p className={`text-sm mt-2 leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
-                                        {review.comment}
-                                    </p>
+                                    <p className={`text-sm mt-2 leading-relaxed ${darkMode ? "text-gray-300" : "text-gray-600"}`}>{review.comment}</p>
                                 </div>
                             ))}
                         </div>
