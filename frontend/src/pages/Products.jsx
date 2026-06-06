@@ -39,10 +39,14 @@ function Products() {
   useEffect(() => {
     api.get("/products")
       .then(res => {
+        console.log("Products:", res.data);
         setProducts(res.data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(err => {
+        console.error("Error:", err);
+        setLoading(false);
+      });
   }, []);
 
   const handleAddToCart = (e, product) => {
@@ -104,13 +108,12 @@ function Products() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${
-                activeCategory === cat
+              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${activeCategory === cat
                   ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105"
                   : darkMode
-                  ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  : "bg-white text-gray-600 hover:bg-gray-100 shadow-sm"
-              }`}
+                    ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    : "bg-white text-gray-600 hover:bg-gray-100 shadow-sm"
+                }`}
             >
               {cat === "All" ? "🛍️ All" : cat === "Electronics" ? "⚡ Electronics" : "👗 Fashion"}
             </button>
@@ -135,11 +138,10 @@ function Products() {
               <div
                 key={product._id}
                 onClick={() => navigate(`/products/${product._id}`)}
-                className={`group rounded-3xl overflow-hidden card-hover cursor-pointer border ${
-                  darkMode
+                className={`group rounded-3xl overflow-hidden card-hover cursor-pointer border ${darkMode
                     ? "bg-gray-800 border-gray-700 hover:border-blue-500"
                     : "bg-white border-gray-100 hover:border-blue-300"
-                }`}
+                  }`}
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
                 {/* Image */}
@@ -151,21 +153,19 @@ function Products() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
-                    <div className={`h-full flex items-center justify-center text-7xl ${
-                      product.category === "Electronics"
+                    <div className={`h-full flex items-center justify-center text-7xl ${product.category === "Electronics"
                         ? "bg-gradient-to-br from-blue-100 to-indigo-100"
                         : "bg-gradient-to-br from-pink-100 to-purple-100"
-                    }`}>
+                      }`}>
                       {getEmoji(product)}
                     </div>
                   )}
                   {/* Category badge */}
                   <div className="absolute top-3 left-3">
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm ${
-                      product.category === "Electronics"
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm ${product.category === "Electronics"
                         ? "bg-blue-600/90 text-white"
                         : "bg-pink-600/90 text-white"
-                    }`}>
+                      }`}>
                       {product.category}
                     </span>
                   </div>
@@ -181,11 +181,10 @@ function Products() {
                     <span className="text-blue-600 font-black text-xl">${product.price}</span>
                     <button
                       onClick={(e) => handleAddToCart(e, product)}
-                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 ${
-                        added[product._id]
+                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 ${added[product._id]
                           ? "bg-green-500 text-white scale-95"
                           : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90 hover:scale-105"
-                      }`}
+                        }`}
                     >
                       {added[product._id] ? "✓ Added!" : "+ Cart"}
                     </button>
