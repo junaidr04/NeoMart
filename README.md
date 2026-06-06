@@ -1,151 +1,61 @@
-# 🛒 NeoMart Frontend
+<div align="center">
 
-NeoMart is a modern MERN-based e-commerce platform designed to provide a seamless online shopping experience. This repository contains the frontend application built with React.js, offering users an intuitive interface for browsing products, managing carts, placing orders, and handling user authentication.
+# 🛒 NeoMart
 
-## 🚀 Live Demo
+### Bangladesh's #1 Modern E-Commerce Platform
 
-// 🔗 https://neo-mart-peach.vercel.app/
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-neo--mart--peach.vercel.app-blue?style=for-the-badge)](https://neo-mart-peach.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-junaidr04-black?style=for-the-badge&logo=github)](https://github.com/junaidr04)
 
-## ✨ Features
+![NeoMart Banner](https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=400&fit=crop)
 
-- User Registration & Login
-- JWT Authentication
-- Browse Products
-- Product Details Page
-- Add to Cart
-- Remove from Cart
-- Responsive Design
-- Protected Routes
-- User Profile Management
-- Order Placement
-- Modern UI with React
-
-## 🛠️ Tech Stack
-
-### Frontend
-- React.js
-- React Router DOM
-- Axios
-- Context API
-- CSS
-- Vite
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- JWT Authentication
-
-## 📂 Project Structure
-
-```bash
-frontend/
-│
-├── public/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── context/
-│   ├── services/
-│   ├── assets/
-│   ├── App.jsx
-│   └── main.jsx
-│
-├── package.json
-└── vite.config.js
-```
-
-## ⚙️ Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/junaidr04/NeoMart.git
-```
-
-### Navigate to Frontend
-
-```bash
-cd NeoMart/frontend
-```
-
-### Install Dependencies
-
-```bash
-npm install
-```
-
-### Start Development Server
-
-```bash
-npm run dev
-```
-
-The application will run at:
-
-```bash
-http://localhost:5173
-```
-
-## 🔑 Environment Variables
-
-Create a `.env` file inside the frontend directory:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-For production:
-
-```env
-VITE_API_URL=https://your-backend-url.onrender.com/api
-```
-
-## 📸 Screenshots
-
-Add screenshots of:
-
-- Home Page
-- Product Listing
-- Product Details
-- Cart Page
-- Login/Register Page
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repository
-2. Create a new branch
-
-```bash
-git checkout -b feature-name
-```
-
-3. Commit your changes
-
-```bash
-git commit -m "Added new feature"
-```
-
-4. Push to GitHub
-
-```bash
-git push origin feature-name
-```
-
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👨‍💻 Author
-
-**Junaid Bin Jahangir**
-
-GitHub: https://github.com/junaidr04
+</div>
 
 ---
 
-⭐ If you like this project, don't forget to give it a star!
+## 🚀 Overview
+
+**NeoMart** is a fully functional, production-ready MERN stack e-commerce application with a modern UI, complete authentication system, admin panel, and order management. Built from scratch with a focus on performance, security, and user experience.
+
+> 🔗 **Live:** [neo-mart-peach.vercel.app](https://neo-mart-peach.vercel.app)
+> 📦 **Backend:** [neomart-backend-6yw4.onrender.com](https://neomart-backend-6yw4.onrender.com)
+
+---
+
+## ✨ Key Features
+
+### 🧑‍💼 User Features
+- ✅ Register & Login with JWT Authentication
+- ✅ Persistent sessions with HTTP-only cookies
+- ✅ Browse products with search & category filter
+- ✅ Product detail pages with full specs
+- ✅ Add to Cart, Update Quantity, Remove items
+- ✅ Checkout with shipping address
+- ✅ Order history & tracking
+- ✅ Dark Mode toggle
+- ✅ Fully responsive (Mobile + Desktop)
+
+### 🛠️ Admin Features
+- ✅ Admin Panel with Products & Orders tabs
+- ✅ Add, Edit, Delete products
+- ✅ View all customer orders
+- ✅ Update order status (Pending → Processing → Shipped → Delivered)
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React.js, Vite, Tailwind CSS |
+| **Routing** | React Router DOM v6 |
+| **State Management** | Context API (Auth, Cart, Theme) |
+| **HTTP Client** | Axios |
+| **Backend** | Node.js, Express.js |
+| **Database** | MongoDB Atlas + Mongoose |
+| **Authentication** | JWT + HTTP-only Cookies |
+| **Deployment** | Vercel (Frontend) + Render (Backend) |
+
+---
+
+## 📂 Project Structure
