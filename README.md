@@ -4,7 +4,7 @@ NeoMart is a modern MERN-based e-commerce platform designed to provide a seamles
 
 ## 🚀 Live Demo
 
-// 🔗 https://neomart-1-zo9u.onrender.com
+// 🔗 https://neo-mart-peach.vercel.app/
 
 ## ✨ Features
 
