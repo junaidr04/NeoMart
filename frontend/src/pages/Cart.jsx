@@ -10,7 +10,7 @@ function Cart() {
   const navigate = useNavigate();
 
   return (
-    <div className={`min-h-screen px-6 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+    <div className={`min-h-screen px-4 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-black mb-2">Your Cart 🛒</h1>
         <p className={`mb-10 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
@@ -28,35 +28,35 @@ function Cart() {
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Cart Items */}
             <div className="flex-1 flex flex-col gap-4">
               {cartItems.map(item => (
-                <div key={item._id} className={`flex items-center gap-4 p-5 rounded-3xl border card-hover ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0">
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-full h-full flex items-center justify-center text-3xl">📦</div>
-                    )}
+                <div key={item._id} className={`p-4 rounded-3xl border ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 w-full h-full flex items-center justify-center text-2xl">📦</div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-black text-sm truncate">{item.name}</h3>
+                      <p className="text-blue-600 font-bold text-sm">${item.price}</p>
+                    </div>
+                    <button onClick={() => removeFromCart(item._id)} className="text-red-400 hover:text-red-600 font-black text-lg flex-shrink-0 ml-1">✕</button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-base truncate">{item.name}</h3>
-                    <p className="text-blue-600 font-bold">${item.price}</p>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button onClick={() => updateQuantity(item._id, item.quantity - 1)} className={`w-9 h-9 rounded-full font-black text-lg transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}>-</button>
-                    <span className="font-black w-6 text-center">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item._id, item.quantity + 1)} className={`w-9 h-9 rounded-full font-black text-lg transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}>+</button>
-                  </div>
-                  <div className="flex-shrink-0">
+                  <div className="flex items-center justify-between mt-3">
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => updateQuantity(item._id, item.quantity - 1)} className={`w-8 h-8 rounded-full font-black text-base transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}>-</button>
+                      <span className="font-black w-6 text-center">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item._id, item.quantity + 1)} className={`w-8 h-8 rounded-full font-black text-base transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}>+</button>
+                    </div>
                     <p className="font-black text-blue-600">${(item.price * item.quantity).toFixed(2)}</p>
                   </div>
-                  <button onClick={() => removeFromCart(item._id)} className="text-red-400 hover:text-red-600 font-black text-xl flex-shrink-0 transition-all hover:scale-110">✕</button>
                 </div>
               ))}
             </div>
 
-            {/* Order Summary */}
             <div className="lg:w-80">
               <div className={`p-6 rounded-3xl border sticky top-24 ${darkMode ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
                 <h2 className="text-xl font-black mb-6">Order Summary</h2>
@@ -78,7 +78,7 @@ function Cart() {
                 </div>
                 <button
                   onClick={() => user ? navigate("/checkout") : navigate("/login")}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all hover:scale-105 shadow-lg"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all shadow-lg"
                 >
                   Checkout →
                 </button>
