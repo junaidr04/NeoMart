@@ -6,7 +6,7 @@ import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import ProductDetail from "./pages/ProductDetail";
 import AdminPanel from "./pages/AdminPanel";
-import Checkout from "./pages/Checkout";
+import Payment from "./pages/Payment"; // Checkout এর বদলে Payment ইম্পোর্ট করা হলো
 import OrderSuccess from "./pages/OrderSuccess";
 import MyOrders from "./pages/MyOrders";
 import Wishlist from "./pages/Wishlist";
@@ -27,7 +27,8 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
+        {/* /checkout পাথে এখন Payment কম্পোনেন্টটি রেন্ডার হবে */}
+        <Route path="/checkout" element={<Payment />} />
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/my-orders" element={<MyOrders />} />
         <Route path="/wishlist" element={<Wishlist />} />
