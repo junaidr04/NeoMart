@@ -4,6 +4,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import api from "../api";
+import { useWishlist } from "../context/WishlistContext";
 
 function StarRating({ rating, onRate }) {
     const [hover, setHover] = useState(0);
@@ -12,6 +13,7 @@ function StarRating({ rating, onRate }) {
             {[1, 2, 3, 4, 5].map(star => (
                 <button
                     key={star}
+                    type="button"
                     onClick={() => onRate && onRate(star)}
                     onMouseEnter={() => onRate && setHover(star)}
                     onMouseLeave={() => onRate && setHover(0)}
@@ -33,6 +35,7 @@ function ProductDetail() {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [added, setAdded] = useState(false);
+    const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
     const [reviews, setReviews] = useState([]);
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState("");
@@ -139,16 +142,32 @@ function ProductDetail() {
                             </div>
                         </div>
 
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={product.stock === 0}
-                            className={`w-full py-4 rounded-full font-bold text-lg transition-all ${added
+                        <div>
+                            {/* Add to Cart Button */}
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={product.stock === 0}
+                                className={`w-full py-4 rounded-full font-bold text-lg transition-all ${added
                                     ? "bg-green-500 text-white"
                                     : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90 hover:scale-105"
-                                }`}
-                        >
-                            {added ? "✓ Added to Cart!" : "Add to Cart 🛒"}
-                        </button>
+                                    }`}
+                            >
+                                {added ? "✓ Added to Cart!" : "Add to Cart 🛒"}
+                            </button>
+
+                            {/* Wishlist Button */}
+                            <button
+                                onClick={() => isWishlisted(product._id) ? removeFromWishlist(product._id) : addToWishlist(product)}
+                                className={`w-full py-3 rounded-full font-bold text-base transition-all mt-3 border-2 ${isWishlisted(product._id)
+                                        ? `border-pink-500 text-pink-500 ${darkMode ? "hover:bg-pink-950/30" : "hover:bg-pink-50"}`
+                                        : darkMode
+                                            ? "border-gray-600 text-gray-300 hover:border-pink-500 hover:text-pink-400"
+                                            : "border-gray-200 text-gray-600 hover:border-pink-500 hover:text-pink-500"
+                                    }`}
+                            >
+                                {isWishlisted(product._id) ? "❤️ Wishlisted" : "🤍 Add to Wishlist"}
+                            </button>
+                        </div>
                     </div>
                 </div>
 

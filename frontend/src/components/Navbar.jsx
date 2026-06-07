@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 
 function Navbar() {
     const { darkMode, toggleDarkMode } = useTheme();
     const { user, logout } = useAuth();
     const { totalItems } = useCart();
+    const { wishlist } = useWishlist();
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
@@ -29,6 +31,17 @@ function Navbar() {
                         {darkMode ? "☀️" : "🌙"}
                     </button>
 
+                    {/* Wishlist icon */}
+                    <Link to="/wishlist" className="relative">
+                        <span className="text-2xl">❤️</span>
+                        {wishlist.length > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                                {wishlist.length}
+                            </span>
+                        )}
+                    </Link>
+
+                    {/* Cart icon */}
                     <Link to="/cart" className="relative">
                         <span className="text-2xl">🛒</span>
                         {totalItems > 0 && (
@@ -72,8 +85,16 @@ function Navbar() {
                     <button onClick={toggleDarkMode} className={`p-2 rounded-full transition-all ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}>
                         {darkMode ? "☀️" : "🌙"}
                     </button>
+                    <Link to="/wishlist" className="relative">
+                        <span className="text-xl">❤️</span>
+                        {wishlist.length > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                                {wishlist.length}
+                            </span>
+                        )}
+                    </Link>
                     <Link to="/cart" className="relative">
-                        <span className="text-2xl">🛒</span>
+                        <span className="text-xl">🛒</span>
                         {totalItems > 0 && (
                             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
                                 {totalItems}
@@ -99,6 +120,9 @@ function Navbar() {
                         <>
                             <Link to="/my-orders" onClick={() => setMenuOpen(false)} className={`font-semibold px-4 py-3 rounded-xl ${darkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}>
                                 📦 My Orders
+                            </Link>
+                            <Link to="/wishlist" onClick={() => setMenuOpen(false)} className={`font-semibold px-4 py-3 rounded-xl ${darkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}>
+                                ❤️ Wishlist
                             </Link>
                             {user.role === "admin" && (
                                 <Link to="/admin" onClick={() => setMenuOpen(false)} className="bg-purple-600 text-white px-4 py-3 rounded-xl font-semibold text-center">
