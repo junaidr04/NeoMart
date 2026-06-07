@@ -6,6 +6,7 @@ import { useTheme } from "../context/ThemeContext";
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -29,7 +30,7 @@ function Login() {
     return (
         <div className={`min-h-screen flex ${darkMode ? "bg-gray-900" : "bg-gray-50"}`}>
 
-            {/* Left side - decorative */}
+            {/* Left side */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-900"></div>
                 <div className="absolute inset-0 opacity-30">
@@ -46,15 +47,13 @@ function Login() {
                     </p>
                     <div className="mt-12 grid grid-cols-2 gap-4 w-full max-w-xs">
                         {["🚀 Fast Delivery", "🔒 Secure Pay", "↩️ Easy Returns", "🎯 Best Prices"].map((item, i) => (
-                            <div key={i} className="glass rounded-2xl p-4 text-center text-sm font-semibold">
-                                {item}
-                            </div>
+                            <div key={i} className="glass rounded-2xl p-4 text-center text-sm font-semibold">{item}</div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* Right side - form */}
+            {/* Right side */}
             <div className={`w-full lg:w-1/2 flex items-center justify-center p-8 ${darkMode ? "bg-gray-900" : "bg-white"}`}>
                 <div className="w-full max-w-md animate-fadeInUp">
                     <div className="lg:hidden text-center mb-8">
@@ -63,12 +62,12 @@ function Login() {
                         </Link>
                     </div>
 
-                    <h1>Sign In 👋</h1>
-                    <p>
+                    <h1 className={`text-3xl font-black mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}>
+                        Sign In 👋
+                    </h1>
+                    <p className={`mb-8 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                         Don't have an account?{" "}
-                        <Link to="/register" className="text-blue-600 font-bold hover:underline">
-                            Register free
-                        </Link>
+                        <Link to="/register" className="text-blue-600 font-bold hover:underline">Register free</Link>
                     </p>
 
                     {error && (
@@ -92,26 +91,37 @@ function Login() {
                                 required
                             />
                         </div>
+
                         <div>
                             <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                                 Password
                             </label>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 transition-all font-medium ${darkMode ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"
-                                    }`}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            {/* Forgot Password Link */}
-                            <div className="text-right mt-2">
-                                <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline font-semibold">
-                                    Forgot Password?
-                                </Link>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    className={`w-full border-2 p-4 pr-12 rounded-2xl focus:outline-none focus:border-blue-500 transition-all font-medium ${darkMode ? "bg-gray-800 border-gray-700 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"
+                                        }`}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    {showPassword ? "👁️" : "🙈"}
+                                </button>
                             </div>
                         </div>
+
+                        <div className="text-right">
+                            <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline font-semibold">
+                                Forgot Password?
+                            </Link>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={loading}
