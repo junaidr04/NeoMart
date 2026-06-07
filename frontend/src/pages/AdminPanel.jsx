@@ -4,6 +4,14 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+// যদি toast লাইব্রেরি ব্যবহার করেন (যেমন react-hot-toast বা react-toastify) তবে এটি আনকমেন্ট করুন:
+// import { toast } from "react-hot-toast"; 
+
+// ব্যাকআপ টোস্ট অবজেক্ট (যদি প্রজেক্টে toast ইনস্টল করা না থাকে যেন ক্র্যাশ না করে)
+const toast = {
+    success: (msg) => alert(msg),
+    error: (msg) => alert(msg)
+};
 
 function AdminPanel() {
     const { darkMode } = useTheme();
@@ -13,6 +21,7 @@ function AdminPanel() {
     const [activeTab, setActiveTab] = useState("dashboard");
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
+    const [coupons, setCoupons] = useState([]); // Added coupons state
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editProduct, setEditProduct] = useState(null);
@@ -24,6 +33,7 @@ function AdminPanel() {
         if (!user || user.role !== "admin") navigate("/");
         fetchProducts();
         fetchOrders();
+        fetchCoupons(); // Added fetchCoupons to useEffect
     }, [user]);
 
     const fetchProducts = async () => {
@@ -35,6 +45,12 @@ function AdminPanel() {
     const fetchOrders = async () => {
         const res = await api.get("/orders");
         setOrders(res.data);
+    };
+
+    // Added fetchCoupons function
+    const fetchCoupons = async () => {
+        const res = await api.get("/coupons");
+        setCoupons(res.data);
     };
 
     const handleSubmit = async (e) => {
@@ -78,6 +94,19 @@ function AdminPanel() {
         fetchOrders();
     };
 
+    // Added handleDeleteCoupon function
+    const handleDeleteCoupon = async (id) => {
+        if (!window.confirm("Delete this coupon?")) return;
+        await api.delete(`/coupons/${id}`);
+        fetchCoupons();
+    };
+
+    // Added handleToggleCoupon function
+    const handleToggleCoupon = async (id) => {
+        await api.put(`/coupons/${id}/toggle`);
+        fetchCoupons();
+    };
+
     const statusColor = {
         pending: "bg-yellow-100 text-yellow-600",
         processing: "bg-blue-100 text-blue-600",
@@ -113,10 +142,12 @@ function AdminPanel() {
 
     const COLORS = ["#3b82f6", "#ec4899", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#06b6d4"];
 
+    // Updated tabs array to include Coupons
     const tabs = [
         { id: "dashboard", label: "📊 Dashboard" },
         { id: "products", label: "📦 Products" },
-        { id: "orders", label: `🛍️ Orders ${orders.length > 0 ? `(${orders.length})` : ""}` }
+        { id: "orders", label: `🛍️ Orders ${orders.length > 0 ? `(${orders.length})` : ""}` },
+        { id: "coupons", label: "🎟️ Coupons" }
     ];
 
     return (
@@ -132,8 +163,8 @@ function AdminPanel() {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`px-6 py-2 rounded-full font-bold text-sm whitespace-nowrap transition-all ${activeTab === tab.id
-                                    ? "bg-blue-600 text-white"
-                                    : darkMode ? "bg-gray-700 text-gray-300" : "bg-white text-gray-600"
+                                ? "bg-blue-600 text-white"
+                                : darkMode ? "bg-gray-700 text-gray-300" : "bg-white text-gray-600"
                                 }`}
                         >
                             {tab.label}
@@ -266,7 +297,7 @@ function AdminPanel() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {products.map((product) => (
+                                            ={products.map((product) => (
                                                 <tr key={product._id} className={`border-t ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-3">
@@ -341,8 +372,8 @@ function AdminPanel() {
                                                     key={s}
                                                     onClick={() => handleStatusUpdate(order._id, s)}
                                                     className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${order.status === s
-                                                            ? statusColor[s]
-                                                            : darkMode ? "bg-gray-700 text-gray-300 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                        ? statusColor[s]
+                                                        : darkMode ? "bg-gray-700 text-gray-300 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                                                         }`}
                                                 >
                                                     {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -356,8 +387,115 @@ function AdminPanel() {
                         )}
                     </div>
                 )}
+
+                {/* Added Coupons Tab content underneath Orders Tab */}
+                {activeTab === "coupons" && (
+                    <div>
+                        {/* Add Coupon Form */}
+                        <div className={`p-6 rounded-2xl shadow-lg mb-6 ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+                            <h2 className="text-xl font-black mb-4">Create Coupon</h2>
+                            <CouponForm darkMode={darkMode} onCreated={fetchCoupons} />
+                        </div>
+
+                        {/* Coupons List */}
+                        <div className={`rounded-2xl shadow-lg overflow-hidden ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+                            <table className="w-full">
+                                <thead className={darkMode ? "bg-gray-700" : "bg-gray-50"}>
+                                    <tr>
+                                        <th className="p-4 text-left text-sm font-bold">Code</th>
+                                        <th className="p-4 text-left text-sm font-bold">Discount</th>
+                                        <th className="p-4 text-left text-sm font-bold">Expiry</th>
+                                        <th className="p-4 text-left text-sm font-bold">Status</th>
+                                        <th className="p-4 text-left text-sm font-bold">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {coupons.map(coupon => (
+                                        <tr key={coupon._id} className={`border-t ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
+                                            <td className="p-4 font-black text-blue-600">{coupon.code}</td>
+                                            <td className="p-4 font-bold">{coupon.discount}%</td>
+                                            <td className="p-4 text-sm">{new Date(coupon.expiryDate).toLocaleDateString()}</td>
+                                            <td className="p-4">
+                                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${coupon.isActive ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}>
+                                                    {coupon.isActive ? "Active" : "Inactive"}
+                                                </span>
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleToggleCoupon(coupon._id)} className="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-yellow-200">
+                                                        {coupon.isActive ? "Deactivate" : "Activate"}
+                                                    </button>
+                                                    <button onClick={() => handleDeleteCoupon(coupon._id)} className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-red-200">
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
+    );
+}
+
+// Added CouponForm component outside of AdminPanel
+function CouponForm({ darkMode, onCreated }) {
+    const [form, setForm] = useState({ code: "", discount: "", expiryDate: "" });
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await api.post("/coupons", form);
+            setForm({ code: "", discount: "", expiryDate: "" });
+            onCreated();
+            toast.success("Coupon created! 🎟️");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Error creating coupon");
+        }
+        setLoading(false);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input
+                type="text"
+                placeholder="COUPON CODE"
+                value={form.code}
+                onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+                className={`border p-3 rounded-xl focus:outline-none focus:border-blue-500 font-bold ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}
+                required
+            />
+            <input
+                type="number"
+                placeholder="Discount % (1-100)"
+                value={form.discount}
+                onChange={(e) => setForm({ ...form, discount: e.target.value })}
+                min="1"
+                max="100"
+                className={`border p-3 rounded-xl focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}
+                required
+            />
+            <input
+                type="date"
+                value={form.expiryDate}
+                onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
+                className={`border p-3 rounded-xl focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}
+                required
+            />
+            <button
+                type="submit"
+                disabled={loading}
+                className="md:col-span-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold hover:opacity-90 transition-all"
+            >
+                {loading ? "Creating..." : "Create Coupon 🎟️"}
+            </button>
+        </form>
     );
 }
 

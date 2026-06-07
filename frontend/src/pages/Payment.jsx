@@ -6,14 +6,15 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import toast from 'react-hot-toast';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-function CheckoutForm({ shippingAddress }) {
+function CheckoutForm({ shippingAddress, finalAmount }) {
     const stripe = useStripe();
     const elements = useElements();
     const { darkMode } = useTheme();
-    const { cartItems, totalPrice, clearCart } = useCart();
+    const { cartItems, clearCart } = useCart();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -24,8 +25,9 @@ function CheckoutForm({ shippingAddress }) {
         setError("");
 
         try {
+            // কুপন ডিসকাউন্ট সহ ফাইনাল অ্যামাউন্ট ব্যাকএন্ডে পাঠানো হচ্ছে
             const { data } = await api.post("/payment/create-payment-intent", {
-                amount: totalPrice
+                amount: finalAmount
             });
 
             const result = await stripe.confirmCardPayment(data.clientSecret, {
@@ -52,7 +54,7 @@ function CheckoutForm({ shippingAddress }) {
                 await api.post("/orders", {
                     items,
                     shippingAddress,
-                    totalPrice,
+                    totalPrice: finalAmount,
                     isPaid: true,
                     paymentMethod: "Stripe"
                 });
@@ -66,7 +68,6 @@ function CheckoutForm({ shippingAddress }) {
         setLoading(false);
     };
 
-    // আপনার নতুন cardStyle অবজেক্টটি এখানে আপডেট করা হয়েছে
     const cardStyle = {
         style: {
             base: {
@@ -96,7 +97,7 @@ function CheckoutForm({ shippingAddress }) {
                 disabled={!stripe || loading}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all disabled:opacity-50"
             >
-                {loading ? "Processing..." : `Pay $${totalPrice.toFixed(2)} →`}
+                {loading ? "Processing..." : `Pay $${finalAmount.toFixed(2)} →`}
             </button>
         </form>
     );
@@ -107,10 +108,37 @@ function Payment() {
     const { cartItems, totalPrice } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+
     const [form, setForm] = useState({
         fullName: "", address: "", city: "", phone: ""
     });
     const [step, setStep] = useState(1);
+
+    // Coupon states
+    const [couponCode, setCouponCode] = useState("");
+    const [couponDiscount, setCouponDiscount] = useState(0);
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponError, setCouponError] = useState("");
+    const [couponSuccess, setCouponSuccess] = useState("");
+
+    const discountedPrice = totalPrice - (totalPrice * couponDiscount / 100);
+
+    const handleCoupon = async () => {
+        if (!couponCode) return;
+        setCouponLoading(true);
+        setCouponError("");
+        setCouponSuccess("");
+        try {
+            const res = await api.post("/coupons/validate", { code: couponCode });
+            setCouponDiscount(res.data.discount);
+            setCouponSuccess(res.data.message);
+            toast.success(res.data.message);
+        } catch (err) {
+            setCouponError(err.response?.data?.message || "Invalid coupon");
+            setCouponDiscount(0);
+        }
+        setCouponLoading(false);
+    };
 
     if (!user) { navigate("/login"); return null; }
     if (cartItems.length === 0) { navigate("/cart"); return null; }
@@ -151,6 +179,33 @@ function Payment() {
                                             required
                                         />
                                     ))}
+
+                                    {/* Coupon Section */}
+                                    <div>
+                                        <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                                            Coupon Code
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Enter coupon code"
+                                                value={couponCode}
+                                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                                className={`flex-1 border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 font-medium ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleCoupon}
+                                                disabled={couponLoading}
+                                                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 rounded-2xl font-bold hover:opacity-90 transition-all"
+                                            >
+                                                {couponLoading ? "..." : "Apply"}
+                                            </button>
+                                        </div>
+                                        {couponError && <p className="text-red-500 text-sm mt-1 font-semibold">⚠️ {couponError}</p>}
+                                        {couponSuccess && <p className="text-green-500 text-sm mt-1 font-semibold">✅ {couponSuccess}</p>}
+                                    </div>
+
                                     <button
                                         onClick={() => {
                                             if (!form.fullName || !form.address || !form.city || !form.phone) return;
@@ -166,9 +221,10 @@ function Payment() {
                             <>
                                 <h2 className="text-2xl font-black mb-6">Payment Details</h2>
                                 <Elements stripe={stripePromise}>
-                                    <CheckoutForm shippingAddress={form} />
+                                    <CheckoutForm shippingAddress={form} finalAmount={discountedPrice} />
                                 </Elements>
                                 <button
+                                    type="button"
                                     onClick={() => setStep(1)}
                                     className={`mt-4 w-full py-3 rounded-2xl font-bold transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}
                                 >
@@ -198,13 +254,22 @@ function Payment() {
                                 <span className={darkMode ? "text-gray-400" : "text-gray-500"}>Subtotal</span>
                                 <span className="font-bold">${totalPrice.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between items-center mb-4">
+                            <div className="flex justify-between items-center mb-2">
                                 <span className={darkMode ? "text-gray-400" : "text-gray-500"}>Delivery</span>
                                 <span className="font-bold text-green-500">Free</span>
                             </div>
+
+                            {/* Coupon Discount Summary */}
+                            {couponDiscount > 0 && (
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-green-500 font-bold">Discount ({couponDiscount}%)</span>
+                                    <span className="text-green-500 font-bold">-${(totalPrice * couponDiscount / 100).toFixed(2)}</span>
+                                </div>
+                            )}
+
                             <div className="flex justify-between items-center">
                                 <span className="font-black text-lg">Total</span>
-                                <span className="font-black text-xl text-blue-600">${totalPrice.toFixed(2)}</span>
+                                <span className="font-black text-xl text-blue-600">${discountedPrice.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
