@@ -3,13 +3,14 @@ import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 
 function AdminPanel() {
     const { darkMode } = useTheme();
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const [activeTab, setActiveTab] = useState("products");
+    const [activeTab, setActiveTab] = useState("dashboard");
     const [products, setProducts] = useState([]);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,9 +21,7 @@ function AdminPanel() {
     });
 
     useEffect(() => {
-        if (!user || user.role !== "admin") {
-            navigate("/");
-        }
+        if (!user || user.role !== "admin") navigate("/");
         fetchProducts();
         fetchOrders();
     }, [user]);
@@ -87,33 +86,137 @@ function AdminPanel() {
         cancelled: "bg-red-100 text-red-600"
     };
 
+    // Dashboard stats
+    const totalRevenue = orders.reduce((sum, o) => sum + o.totalPrice, 0);
+    const totalOrders = orders.length;
+    const totalProducts = products.length;
+    const pendingOrders = orders.filter(o => o.status === "pending").length;
+
+    // Category distribution for pie chart
+    const categoryData = products.reduce((acc, p) => {
+        acc[p.category] = (acc[p.category] || 0) + 1;
+        return acc;
+    }, {});
+    const pieData = Object.entries(categoryData).map(([name, value]) => ({ name, value }));
+
+    // Order status distribution
+    const statusData = ["pending", "processing", "shipped", "delivered", "cancelled"].map(s => ({
+        name: s.charAt(0).toUpperCase() + s.slice(1),
+        count: orders.filter(o => o.status === s).length
+    }));
+
+    // Revenue by day (last 7 orders)
+    const revenueData = orders.slice(0, 7).reverse().map((o, i) => ({
+        day: `Order ${i + 1}`,
+        revenue: o.totalPrice
+    }));
+
+    const COLORS = ["#3b82f6", "#ec4899", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#06b6d4"];
+
+    const tabs = [
+        { id: "dashboard", label: "📊 Dashboard" },
+        { id: "products", label: "📦 Products" },
+        { id: "orders", label: `🛍️ Orders ${orders.length > 0 ? `(${orders.length})` : ""}` }
+    ];
+
     return (
-        <div className={`min-h-screen px-6 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
-            <div className="max-w-6xl mx-auto">
+        <div className={`min-h-screen px-4 py-8 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
+            <div className="max-w-7xl mx-auto">
 
                 <h1 className="text-4xl font-extrabold mb-8">Admin Panel 🛠️</h1>
 
-                <div className="flex gap-3 mb-8">
-                    <button
-                        onClick={() => setActiveTab("products")}
-                        className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${activeTab === "products"
-                                ? "bg-blue-600 text-white"
-                                : darkMode ? "bg-gray-700 text-gray-300" : "bg-white text-gray-600"
-                            }`}
-                    >
-                        📦 Products
-                    </button>
-                    <button
-                        onClick={() => setActiveTab("orders")}
-                        className={`px-6 py-2 rounded-full font-bold text-sm transition-all ${activeTab === "orders"
-                                ? "bg-blue-600 text-white"
-                                : darkMode ? "bg-gray-700 text-gray-300" : "bg-white text-gray-600"
-                            }`}
-                    >
-                        🛍️ Orders {orders.length > 0 && `(${orders.length})`}
-                    </button>
+                {/* Tabs */}
+                <div className="flex gap-3 mb-8 overflow-x-auto">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-6 py-2 rounded-full font-bold text-sm whitespace-nowrap transition-all ${activeTab === tab.id
+                                    ? "bg-blue-600 text-white"
+                                    : darkMode ? "bg-gray-700 text-gray-300" : "bg-white text-gray-600"
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
 
+                {/* Dashboard Tab */}
+                {activeTab === "dashboard" && (
+                    <div>
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            {[
+                                { label: "Total Revenue", value: `$${totalRevenue.toFixed(2)}`, icon: "💰", color: "from-blue-500 to-blue-700" },
+                                { label: "Total Orders", value: totalOrders, icon: "🛍️", color: "from-purple-500 to-purple-700" },
+                                { label: "Total Products", value: totalProducts, icon: "📦", color: "from-green-500 to-green-700" },
+                                { label: "Pending Orders", value: pendingOrders, icon: "⏳", color: "from-orange-500 to-orange-700" },
+                            ].map((stat, i) => (
+                                <div key={i} className={`bg-gradient-to-br ${stat.color} p-6 rounded-2xl text-white shadow-lg`}>
+                                    <div className="text-3xl mb-2">{stat.icon}</div>
+                                    <div className="text-2xl font-black">{stat.value}</div>
+                                    <div className="text-sm opacity-80 mt-1">{stat.label}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Charts */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+                            {/* Revenue Chart */}
+                            <div className={`p-6 rounded-2xl shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+                                <h3 className="font-black text-lg mb-4">📈 Revenue Trend</h3>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={revenueData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#374151" : "#e5e7eb"} />
+                                        <XAxis dataKey="day" tick={{ fill: darkMode ? "#9ca3af" : "#6b7280", fontSize: 11 }} />
+                                        <YAxis tick={{ fill: darkMode ? "#9ca3af" : "#6b7280", fontSize: 11 }} />
+                                        <Tooltip
+                                            contentStyle={{ background: darkMode ? "#1f2937" : "#fff", border: "none", borderRadius: "12px" }}
+                                            labelStyle={{ color: darkMode ? "#fff" : "#000" }}
+                                        />
+                                        <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} dot={{ fill: "#3b82f6", r: 5 }} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Category Pie Chart */}
+                            <div className={`p-6 rounded-2xl shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+                                <h3 className="font-black text-lg mb-4">🥧 Products by Category</h3>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <PieChart>
+                                        <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                                            {pieData.map((_, index) => (
+                                                <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip contentStyle={{ background: darkMode ? "#1f2937" : "#fff", border: "none", borderRadius: "12px" }} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Order Status Chart */}
+                        <div className={`p-6 rounded-2xl shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+                            <h3 className="font-black text-lg mb-4">📊 Orders by Status</h3>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={statusData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#374151" : "#e5e7eb"} />
+                                    <XAxis dataKey="name" tick={{ fill: darkMode ? "#9ca3af" : "#6b7280", fontSize: 12 }} />
+                                    <YAxis tick={{ fill: darkMode ? "#9ca3af" : "#6b7280", fontSize: 12 }} />
+                                    <Tooltip contentStyle={{ background: darkMode ? "#1f2937" : "#fff", border: "none", borderRadius: "12px" }} />
+                                    <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]}>
+                                        {statusData.map((_, index) => (
+                                            <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                )}
+
+                {/* Products Tab */}
                 {activeTab === "products" && (
                     <>
                         <div className="flex justify-between items-center mb-6">
@@ -132,8 +235,9 @@ function AdminPanel() {
                                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <input type="text" placeholder="Product Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`} required />
                                     <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}>
-                                        <option value="Electronics">Electronics</option>
-                                        <option value="Fashion">Fashion</option>
+                                        {["Electronics", "Fashion", "Laptops", "Mobiles", "Headphones", "Mouse", "Keyboard"].map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
                                     </select>
                                     <input type="number" placeholder="Price" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`} required />
                                     <input type="number" placeholder="Stock" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} className={`border p-3 rounded-lg focus:outline-none focus:border-blue-500 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`} required />
@@ -150,47 +254,50 @@ function AdminPanel() {
                             <p className="text-center text-blue-500">Loading...</p>
                         ) : (
                             <div className={`rounded-2xl shadow-lg overflow-hidden ${darkMode ? "bg-gray-800" : "bg-white"}`}>
-                                <table className="w-full">
-                                    <thead className={darkMode ? "bg-gray-700" : "bg-gray-50"}>
-                                        <tr>
-                                            <th className="p-4 text-left text-sm font-bold">Product</th>
-                                            <th className="p-4 text-left text-sm font-bold">Category</th>
-                                            <th className="p-4 text-left text-sm font-bold">Price</th>
-                                            <th className="p-4 text-left text-sm font-bold">Stock</th>
-                                            <th className="p-4 text-left text-sm font-bold">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {products.map((product) => (
-                                            <tr key={product._id} className={`border-t ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        {product.image && <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />}
-                                                        <span className="font-semibold text-sm">{product.name}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${product.category === "Electronics" ? "bg-blue-100 text-blue-600" : "bg-pink-100 text-pink-600"}`}>
-                                                        {product.category}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 font-bold text-blue-600">${product.price}</td>
-                                                <td className="p-4"><span className={product.stock > 0 ? "text-green-500" : "text-red-500"}>{product.stock}</span></td>
-                                                <td className="p-4">
-                                                    <div className="flex gap-2">
-                                                        <button onClick={() => handleEdit(product)} className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-200">Edit</button>
-                                                        <button onClick={() => handleDelete(product._id)} className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-red-200">Delete</button>
-                                                    </div>
-                                                </td>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className={darkMode ? "bg-gray-700" : "bg-gray-50"}>
+                                            <tr>
+                                                <th className="p-4 text-left text-sm font-bold">Product</th>
+                                                <th className="p-4 text-left text-sm font-bold">Category</th>
+                                                <th className="p-4 text-left text-sm font-bold">Price</th>
+                                                <th className="p-4 text-left text-sm font-bold">Stock</th>
+                                                <th className="p-4 text-left text-sm font-bold">Actions</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {products.map((product) => (
+                                                <tr key={product._id} className={`border-t ${darkMode ? "border-gray-700" : "border-gray-100"}`}>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            {product.image && <img src={product.image} alt={product.name} className="w-10 h-10 rounded-lg object-cover" />}
+                                                            <span className="font-semibold text-sm">{product.name}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${product.category === "Electronics" ? "bg-blue-100 text-blue-600" : "bg-pink-100 text-pink-600"}`}>
+                                                            {product.category}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 font-bold text-blue-600">${product.price}</td>
+                                                    <td className="p-4"><span className={product.stock > 0 ? "text-green-500" : "text-red-500"}>{product.stock}</span></td>
+                                                    <td className="p-4">
+                                                        <div className="flex gap-2">
+                                                            <button onClick={() => handleEdit(product)} className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-200">Edit</button>
+                                                            <button onClick={() => handleDelete(product._id)} className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-red-200">Delete</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
                     </>
                 )}
 
+                {/* Orders Tab */}
                 {activeTab === "orders" && (
                     <div className="flex flex-col gap-6">
                         {orders.length === 0 ? (
