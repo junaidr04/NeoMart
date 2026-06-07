@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
-import { useNavigate } from "react-router-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api";
 
