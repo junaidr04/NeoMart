@@ -64,6 +64,9 @@ function Navbar() {
                             <span className={`font-semibold text-sm ${darkMode ? "text-gray-200" : "text-gray-700"}`}>
                                 Hi, {user.name.split(" ")[0]} 👋
                             </span>
+                            <Link to="/change-password" className={`font-semibold text-sm px-4 py-2 rounded-full transition-all ${darkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}>
+                                🔒 Password
+                            </Link>
                             <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-600 transition-all text-sm">
                                 Logout
                             </button>
@@ -120,6 +123,9 @@ function Navbar() {
                         <>
                             <Link to="/my-orders" onClick={() => setMenuOpen(false)} className={`font-semibold px-4 py-3 rounded-xl ${darkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}>
                                 📦 My Orders
+                            </Link>
+                            <Link to="/change-password" onClick={() => setMenuOpen(false)} className={`font-semibold px-4 py-3 rounded-xl ${darkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}>
+                                🔒 Change Password
                             </Link>
                             <Link to="/wishlist" onClick={() => setMenuOpen(false)} className={`font-semibold px-4 py-3 rounded-xl ${darkMode ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}`}>
                                 ❤️ Wishlist

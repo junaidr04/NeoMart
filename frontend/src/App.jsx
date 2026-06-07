@@ -10,6 +10,7 @@ import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import MyOrders from "./pages/MyOrders";
 import Wishlist from "./pages/Wishlist";
+import ChangePassword from "./pages/ChangePassword";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./ScrollToTop";
@@ -30,6 +31,7 @@ function App() {
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/my-orders" element={<MyOrders />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>
       <Footer />
