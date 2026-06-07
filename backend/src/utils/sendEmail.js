@@ -1,19 +1,6 @@
-const { Resend } = require("resend");
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const sendEmail = async ({ to, subject, html }) => {
-  try {
-    await resend.emails.send({
-      from: "NeoMart <onboarding@resend.dev>",
-      to,
-      subject,
-      html
-    });
-    console.log("Email sent to:", to);
-  } catch (error) {
-    console.error("Email error:", error.message);
-  }
+  // Email disabled - enable when domain is configured
+  console.log("Email skipped (no domain configured):", to);
 };
 
 module.exports = sendEmail;
