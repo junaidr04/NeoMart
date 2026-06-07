@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import toast from 'react-hot-toast';
 
 function ChangePassword() {
     const { darkMode } = useTheme();
@@ -15,7 +16,14 @@ function ChangePassword() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    if (!user) { navigate("/login"); return null; }
+    // ইউজার লগইন না থাকলে সুরক্ষিতভাবে রিডাইরেক্ট করার জন্য
+    useEffect(() => {
+        if (!user) {
+            navigate("/login");
+        }
+    }, [user, navigate]);
+
+    if (!user) return null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,10 +46,15 @@ function ChangePassword() {
                 currentPassword: form.currentPassword,
                 newPassword: form.newPassword
             });
+
+            // পাসওয়ার্ড সফলভাবে চেঞ্জ হলে নোটিফিকেশন ও স্টেট আপডেট
             setSuccess("Password changed successfully! 🎉");
+            toast.success("Password changed successfully! 🎉");
+
             setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
         } catch (err) {
             setError(err.response?.data?.message || "Failed to change password");
+            toast.error(err.response?.data?.message || "Failed to change password");
         }
         setLoading(false);
     };

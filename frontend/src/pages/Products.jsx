@@ -3,6 +3,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api";
+import toast from 'react-hot-toast'; // ইম্পোর্ট লাইনটি নিশ্চিত করা হলো
 
 const categoryEmoji = {
   "Electronics": {
@@ -49,9 +50,11 @@ function Products() {
       .catch(() => setLoading(false));
   }, []);
 
+  // নতুন আপডেটেড handleAddToCart ফাংশন
   const handleAddToCart = (e, product) => {
     e.stopPropagation();
     addToCart(product);
+    toast.success(`${product.name} added to cart! 🛒`); // টোস্ট নোটিফিকেশন যুক্ত করা হলো
     setAdded(prev => ({ ...prev, [product._id]: true }));
     setTimeout(() => {
       setAdded(prev => ({ ...prev, [product._id]: false }));

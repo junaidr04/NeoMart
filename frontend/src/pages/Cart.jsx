@@ -2,6 +2,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import toast from 'react-hot-toast';
 
 function Cart() {
   const { darkMode } = useTheme();
@@ -82,7 +83,12 @@ function Cart() {
                 >
                   Checkout →
                 </button>
-                <button onClick={clearCart} className="w-full mt-3 text-red-500 hover:text-red-700 font-bold py-2 transition-all">
+
+                {/* আপডেটেড Clear Cart বাটন */}
+                <button
+                  onClick={() => { clearCart(); toast.success("Cart cleared! 🗑️"); }}
+                  className="w-full mt-3 text-red-500 hover:text-red-700 font-bold py-2 transition-all"
+                >
                   Clear Cart
                 </button>
               </div>

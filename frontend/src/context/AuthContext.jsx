@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "../api";
+import toast from 'react-hot-toast';
 
 const AuthContext = createContext();
 
@@ -31,20 +32,28 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
+  // আপডেটেড login ফাংশন
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
     const { token, user } = res.data;
     localStorage.setItem("token", token);
     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     setUser(user);
+    toast.success(`Welcome back, ${user.name.split(" ")[0]}! 👋`); // লগইন সাকসেস টোস্ট
     return res.data;
   };
 
+  // আপডেটেড logout ফাংশন
   const logout = async () => {
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];
-    await api.post("/auth/logout");
+    try {
+      await api.post("/auth/logout");
+    } catch (error) {
+      console.error("Logout API call failed:", error);
+    }
     setUser(null);
+    toast.success("Logged out successfully! 👋"); // লগআউট সাকসেস টোস্ট
   };
 
   return (

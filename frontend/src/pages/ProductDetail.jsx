@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import api from "../api";
 import { useWishlist } from "../context/WishlistContext";
+import toast from 'react-hot-toast'; // ইম্পোর্ট সিনট্যাক্স ঠিক করা হলো
 
 function StarRating({ rating, onRate }) {
     const [hover, setHover] = useState(0);
@@ -55,8 +56,10 @@ function ProductDetail() {
             .catch(() => { });
     }, [id]);
 
+    // আপডেটেড handleAddToCart ফাংশন
     const handleAddToCart = () => {
         addToCart(product);
+        toast.success(`${product.name} added to cart! 🛒`); // টোস্ট নোটিফিকেশন যুক্ত হলো
         setAdded(true);
         setTimeout(() => setAdded(false), 1500);
     };
@@ -159,10 +162,10 @@ function ProductDetail() {
                             <button
                                 onClick={() => isWishlisted(product._id) ? removeFromWishlist(product._id) : addToWishlist(product)}
                                 className={`w-full py-3 rounded-full font-bold text-base transition-all mt-3 border-2 ${isWishlisted(product._id)
-                                        ? `border-pink-500 text-pink-500 ${darkMode ? "hover:bg-pink-950/30" : "hover:bg-pink-50"}`
-                                        : darkMode
-                                            ? "border-gray-600 text-gray-300 hover:border-pink-500 hover:text-pink-400"
-                                            : "border-gray-200 text-gray-600 hover:border-pink-500 hover:text-pink-500"
+                                    ? `border-pink-500 text-pink-500 ${darkMode ? "hover:bg-pink-950/30" : "hover:bg-pink-50"}`
+                                    : darkMode
+                                        ? "border-gray-600 text-gray-300 hover:border-pink-500 hover:text-pink-400"
+                                        : "border-gray-200 text-gray-600 hover:border-pink-500 hover:text-pink-500"
                                     }`}
                             >
                                 {isWishlisted(product._id) ? "❤️ Wishlisted" : "🤍 Add to Wishlist"}
