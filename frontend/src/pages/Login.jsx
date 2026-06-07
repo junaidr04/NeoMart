@@ -63,10 +63,8 @@ function Login() {
                         </Link>
                     </div>
 
-                    <h1 className={`text-3xl font-black mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}>
-                        Sign In 👋
-                    </h1>
-                    <p className={`mb-8 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                    <h1>Sign In 👋</h1>
+                    <p>
                         Don't have an account?{" "}
                         <Link to="/register" className="text-blue-600 font-bold hover:underline">
                             Register free
@@ -107,6 +105,12 @@ function Login() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
+                            {/* Forgot Password Link */}
+                            <div className="text-right mt-2">
+                                <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline font-semibold">
+                                    Forgot Password?
+                                </Link>
+                            </div>
                         </div>
                         <button
                             type="submit"

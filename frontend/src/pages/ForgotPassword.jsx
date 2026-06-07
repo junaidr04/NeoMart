@@ -1,47 +1,41 @@
 import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "../api";
 
-function ChangePassword() {
+function ForgotPassword() {
     const { darkMode } = useTheme();
-    const { user } = useAuth();
-    const navigate = useNavigate();
-
-    const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    const [show, setShow] = useState({ current: false, new: false, confirm: false });
+    const [email, setEmail] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [show, setShow] = useState({ new: false, confirm: false });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-
-    if (!user) { navigate("/login"); return null; }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
         setSuccess("");
 
-        if (form.newPassword !== form.confirmPassword) {
-            setError("New passwords don't match!");
+        if (newPassword !== confirmPassword) {
+            setError("Passwords don't match!");
             return;
         }
-        if (form.newPassword.length < 6) {
+        if (newPassword.length < 6) {
             setError("Password must be at least 6 characters!");
             return;
         }
 
         setLoading(true);
         try {
-            const endpoint = user.role === "admin" ? "/auth/admin/change-password" : "/auth/change-password";
-            await api.put(endpoint, {
-                currentPassword: form.currentPassword,
-                newPassword: form.newPassword
-            });
-            setSuccess("Password changed successfully! 🎉");
-            setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            await api.post("/auth/forgot-password", { email, newPassword });
+            setSuccess("Password reset successfully! You can now login. 🎉");
+            setEmail("");
+            setNewPassword("");
+            setConfirmPassword("");
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to change password");
+            setError(err.response?.data?.message || "Failed to reset password");
         }
         setLoading(false);
     };
@@ -59,11 +53,9 @@ function ChangePassword() {
     return (
         <div className={`min-h-screen flex items-center justify-center px-4 py-12 ${darkMode ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-900"}`}>
             <div className={`w-full max-w-md p-8 rounded-3xl shadow-xl ${darkMode ? "bg-gray-800" : "bg-white"}`}>
-                <h1 className="text-3xl font-black mb-2">
-                    {user.role === "admin" ? "🔐 Admin Password" : "🔒 Change Password"}
-                </h1>
+                <h1 className="text-3xl font-black mb-2">🔑 Forgot Password</h1>
                 <p className={`mb-8 text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                    Update your account password
+                    Enter your email and set a new password
                 </p>
 
                 {error && (
@@ -79,18 +71,15 @@ function ChangePassword() {
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <div>
-                        <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Current Password</label>
-                        <div className="relative">
-                            <input
-                                type={show.current ? "text" : "password"}
-                                placeholder="••••••••"
-                                value={form.currentPassword}
-                                onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
-                                className={`w-full border-2 p-4 pr-12 rounded-2xl focus:outline-none focus:border-blue-500 font-medium ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
-                                required
-                            />
-                            <EyeButton field="current" />
-                        </div>
+                        <label className={`text-sm font-bold mb-2 block ${darkMode ? "text-gray-300" : "text-gray-700"}`}>Email Address</label>
+                        <input
+                            type="email"
+                            placeholder="your@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className={`w-full border-2 p-4 rounded-2xl focus:outline-none focus:border-blue-500 font-medium ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
+                            required
+                        />
                     </div>
 
                     <div>
@@ -99,8 +88,8 @@ function ChangePassword() {
                             <input
                                 type={show.new ? "text" : "password"}
                                 placeholder="••••••••"
-                                value={form.newPassword}
-                                onChange={(e) => setForm({ ...form, newPassword: e.target.value })}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
                                 className={`w-full border-2 p-4 pr-12 rounded-2xl focus:outline-none focus:border-blue-500 font-medium ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
                                 required
                             />
@@ -114,8 +103,8 @@ function ChangePassword() {
                             <input
                                 type={show.confirm ? "text" : "password"}
                                 placeholder="••••••••"
-                                value={form.confirmPassword}
-                                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
                                 className={`w-full border-2 p-4 pr-12 rounded-2xl focus:outline-none focus:border-blue-500 font-medium ${darkMode ? "bg-gray-700 border-gray-600 text-white placeholder-gray-500" : "border-gray-200 placeholder-gray-400"}`}
                                 required
                             />
@@ -128,19 +117,18 @@ function ChangePassword() {
                         disabled={loading}
                         className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all mt-2 disabled:opacity-50"
                     >
-                        {loading ? "Changing..." : "Change Password →"}
+                        {loading ? "Resetting..." : "Reset Password →"}
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => navigate(-1)}
-                        className={`py-3 rounded-2xl font-bold transition-all ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}
+                    <Link
+                        to="/login"
+                        className={`py-3 rounded-2xl font-bold transition-all text-center ${darkMode ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-100 hover:bg-gray-200"}`}
                     >
-                        ← Go Back
-                    </button>
+                        ← Back to Login
+                    </Link>
                 </form>
             </div>
         </div>
     );
 }
 
-export default ChangePassword;
+export default ForgotPassword;
