@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-function CheckoutForm({ shippingAddress, finalAmount }) {
+function CheckoutForm({ shippingAddress, finalAmount, paymentMethod, setPaymentMethod, setShowSuccess }) {
     const stripe = useStripe();
     const elements = useElements();
     const { darkMode } = useTheme();
@@ -25,7 +25,31 @@ function CheckoutForm({ shippingAddress, finalAmount }) {
         setError("");
 
         try {
-            // কুপন ডিসকাউন্ট সহ ফাইনাল অ্যামাউন্ট ব্যাকএন্ডে পাঠানো হচ্ছে
+            // bKash or Nagad Payment Logic
+            if (paymentMethod === "bkash" || paymentMethod === "nagad") {
+                const items = cartItems.map(item => ({
+                    product: item._id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    image: item.image
+                }));
+
+                await api.post("/orders", {
+                    items,
+                    shippingAddress,
+                    totalPrice: finalAmount, // কুপন ডিসকাউন্ট সহ ফাইনাল অ্যামাউন্ট পাঠানো হচ্ছে
+                    isPaid: true,
+                    paymentMethod: paymentMethod === "bkash" ? "bKash" : "Nagad"
+                });
+
+                clearCart();
+                setShowSuccess(true);
+                setTimeout(() => navigate("/order-success"), 2000);
+                return;
+            }
+
+            // Stripe Card Payment Logic
             const { data } = await api.post("/payment/create-payment-intent", {
                 amount: finalAmount
             });
@@ -81,21 +105,59 @@ function CheckoutForm({ shippingAddress, finalAmount }) {
 
     return (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+
+            {/* Payment Method Selector */}
+            <div className="flex flex-col gap-3 mb-4">
+                <label className={`text-sm font-bold ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Select Payment Method
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                    {[
+                        { id: "card", label: "💳 Card", color: "from-blue-500 to-indigo-600" },
+                        { id: "bkash", label: "🟣 bKash", color: "from-pink-500 to-pink-700" },
+                        { id: "nagad", label: "🟠 Nagad", color: "from-orange-500 to-orange-700" },
+                    ].map(method => (
+                        <button
+                            key={method.id}
+                            type="button"
+                            onClick={() => setPaymentMethod(method.id)}
+                            className={`py-3 px-2 rounded-2xl font-bold text-sm transition-all ${paymentMethod === method.id
+                                    ? `bg-gradient-to-r ${method.color} text-white shadow-lg scale-105`
+                                    : darkMode ? "bg-gray-700 text-gray-300 hover:bg-gray-600" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                }`}
+                        >
+                            {method.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm font-semibold">
                     ⚠️ {error}
                 </div>
             )}
-            <div className={`border-2 p-4 rounded-2xl ${darkMode ? "border-gray-600 bg-gray-700" : "border-gray-200"}`}>
-                <CardElement options={cardStyle} />
-            </div>
-            <div className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                🔒 Test card: 4242 4242 4242 4242 | Any future date | Any CVC
-            </div>
+
+            {/* Render Card Input only if paymentMethod is Card */}
+            {paymentMethod === "card" ? (
+                <>
+                    <div className={`border-2 p-4 rounded-2xl ${darkMode ? "border-gray-600 bg-gray-700" : "border-gray-200"}`}>
+                        <CardElement options={cardStyle} />
+                    </div>
+                    <div className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                        🔒 Test card: 4242 4242 4242 4242 | Any future date | Any CVC
+                    </div>
+                </>
+            ) : (
+                <div className={`p-4 rounded-2xl border-2 text-center border-dashed font-semibold text-sm ${darkMode ? "border-gray-600 text-gray-400" : "border-gray-300 text-gray-600"}`}>
+                    You will process payment via {paymentMethod === "bkash" ? "bKash 🟣" : "Nagad 🟠"} instantly.
+                </div>
+            )}
+
             <button
                 type="submit"
-                disabled={!stripe || loading}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all disabled:opacity-50"
+                disabled={(paymentMethod === "card" && !stripe) || loading}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all disabled:opacity-50 mt-2"
             >
                 {loading ? "Processing..." : `Pay $${finalAmount.toFixed(2)} →`}
             </button>
@@ -113,6 +175,8 @@ function Payment() {
         fullName: "", address: "", city: "", phone: ""
     });
     const [step, setStep] = useState(1);
+    const [paymentMethod, setPaymentMethod] = useState("card");
+    const [showSuccess, setShowSuccess] = useState(false);
 
     // Coupon states
     const [couponCode, setCouponCode] = useState("");
@@ -125,7 +189,7 @@ function Payment() {
 
     const handleCoupon = async () => {
         if (!couponCode) return;
-        setCouponLoading(true);
+        couponLoading(true);
         setCouponError("");
         setCouponSuccess("");
         try {
@@ -163,7 +227,23 @@ function Payment() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Left side */}
-                    <div className={`p-8 rounded-3xl shadow-lg ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+                    <div className={`p-8 rounded-3xl shadow-lg relative ${darkMode ? "bg-gray-800" : "bg-white"}`}>
+
+                        {/* Success Notification Modal */}
+                        {showSuccess && (
+                            <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+                                <div className="bg-white dark:bg-gray-800 rounded-3xl p-10 text-center shadow-2xl max-w-sm mx-4 animate-bounce">
+                                    <div className="text-7xl mb-4">🎉</div>
+                                    <h2 className="text-2xl font-black mb-2 text-gray-900 dark:text-white">Payment Successful!</h2>
+                                    <p className="text-gray-500 dark:text-gray-400 mb-2">Your order has been placed via {paymentMethod === "bkash" ? "bKash 🟣" : "Nagad 🟠"}</p>
+                                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-4">
+                                        <div className="bg-green-500 h-1.5 rounded-full w-full animate-pulse"></div>
+                                    </div>
+                                    <p className="text-sm text-gray-400 mt-2">Redirecting...</p>
+                                </div>
+                            </div>
+                        )}
+
                         {step === 1 ? (
                             <>
                                 <h2 className="text-2xl font-black mb-6">Shipping Address</h2>
@@ -208,7 +288,10 @@ function Payment() {
 
                                     <button
                                         onClick={() => {
-                                            if (!form.fullName || !form.address || !form.city || !form.phone) return;
+                                            if (!form.fullName || !form.address || !form.city || !form.phone) {
+                                                toast.error("Please fill in all shipping fields");
+                                                return;
+                                            }
                                             setStep(2);
                                         }}
                                         className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all mt-2"
@@ -221,7 +304,13 @@ function Payment() {
                             <>
                                 <h2 className="text-2xl font-black mb-6">Payment Details</h2>
                                 <Elements stripe={stripePromise}>
-                                    <CheckoutForm shippingAddress={form} finalAmount={discountedPrice} />
+                                    <CheckoutForm
+                                        shippingAddress={form}
+                                        finalAmount={discountedPrice}
+                                        paymentMethod={paymentMethod}
+                                        setPaymentMethod={setPaymentMethod}
+                                        setShowSuccess={setShowSuccess}
+                                    />
                                 </Elements>
                                 <button
                                     type="button"
