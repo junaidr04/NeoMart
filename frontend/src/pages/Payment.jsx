@@ -66,6 +66,7 @@ function CheckoutForm({ shippingAddress }) {
         setLoading(false);
     };
 
+    // আপনার নতুন cardStyle অবজেক্টটি এখানে আপডেট করা হয়েছে
     const cardStyle = {
         style: {
             base: {
@@ -73,7 +74,8 @@ function CheckoutForm({ shippingAddress }) {
                 color: darkMode ? "#fff" : "#1a1a1a",
                 "::placeholder": { color: darkMode ? "#9ca3af" : "#6b7280" }
             }
-        }
+        },
+        hidePostalCode: true
     };
 
     return (
