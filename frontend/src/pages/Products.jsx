@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api";
 
 const categoryEmoji = {
@@ -33,7 +34,11 @@ function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState({});
-  const [activeCategory, setActiveCategory] = useState("All");
+  const location = useLocation();
+  const [activeCategory, setActiveCategory] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("category") || "All";
+  });
   const [search, setSearch] = useState("");
 
   useEffect(() => {
@@ -124,10 +129,10 @@ function Products() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-2 rounded-full font-bold text-xs whitespace-nowrap flex-shrink-0 transition-all duration-300 ${activeCategory === cat
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105"
-                  : darkMode
-                    ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    : "bg-white text-gray-600 hover:bg-gray-100 shadow-sm"
+                ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg scale-105"
+                : darkMode
+                  ? "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  : "bg-white text-gray-600 hover:bg-gray-100 shadow-sm"
                 }`}
             >
               {categoryLabel[cat]}
@@ -154,8 +159,8 @@ function Products() {
                 key={product._id}
                 onClick={() => navigate(`/products/${product._id}`)}
                 className={`group rounded-2xl overflow-hidden card-hover cursor-pointer border ${darkMode
-                    ? "bg-gray-800 border-gray-700 hover:border-blue-500"
-                    : "bg-white border-gray-100 hover:border-blue-300"
+                  ? "bg-gray-800 border-gray-700 hover:border-blue-500"
+                  : "bg-white border-gray-100 hover:border-blue-300"
                   }`}
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
@@ -188,8 +193,8 @@ function Products() {
                     <button
                       onClick={(e) => handleAddToCart(e, product)}
                       className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${added[product._id]
-                          ? "bg-green-500 text-white"
-                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90"
+                        ? "bg-green-500 text-white"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-90"
                         }`}
                     >
                       {added[product._id] ? "✓" : "+ Cart"}

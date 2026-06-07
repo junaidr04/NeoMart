@@ -1,14 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Footer() {
+  const navigate = useNavigate();
+
+  const handleCategory = (cat) => {
+    navigate(`/products?category=${cat}`);
+  };
+
   return (
     <footer className="bg-gray-950 text-gray-300 mt-20">
       <div className="max-w-6xl mx-auto px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div className="md:col-span-1">
-            <h2 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-4">
+            <Link to="/" className="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent mb-4 block">
               NeoMart
-            </h2>
+            </Link>
             <p className="text-sm text-gray-400 leading-relaxed mb-6">
               Bangladesh's #1 online store for Electronics and Fashion. Quality products at unbeatable prices.
             </p>
@@ -37,8 +43,23 @@ function Footer() {
           <div>
             <h3 className="text-white font-black mb-4">Categories</h3>
             <ul className="space-y-3 text-sm">
-              {["⚡ Electronics", "👗 Fashion", "📱 Smartphones", "💻 Laptops", "👟 Shoes"].map((item) => (
-                <li key={item} className="hover:text-blue-400 transition-colors cursor-pointer">{item}</li>
+              {[
+                ["⚡ Electronics", "Electronics"],
+                ["👗 Fashion", "Fashion"],
+                ["📱 Mobiles", "Mobiles"],
+                ["💻 Laptops", "Laptops"],
+                ["🎧 Headphones", "Headphones"],
+                ["🖱️ Mouse", "Mouse"],
+                ["⌨️ Keyboard", "Keyboard"]
+              ].map(([label, cat]) => (
+                <li key={cat}>
+                  <button
+                    onClick={() => handleCategory(cat)}
+                    className="hover:text-blue-400 transition-colors cursor-pointer text-left"
+                  >
+                    {label}
+                  </button>
+                </li>
               ))}
             </ul>
           </div>
