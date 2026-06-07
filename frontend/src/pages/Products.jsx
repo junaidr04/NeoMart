@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api";
 import toast from 'react-hot-toast'; // ইম্পোর্ট লাইনটি নিশ্চিত করা হলো
+import ProductSkeleton from "../components/ProductSkeleton";
 
 const categoryEmoji = {
   "Electronics": {
@@ -145,9 +146,12 @@ function Products() {
 
       {/* Products Grid */}
       <div className="px-4 py-8">
+        {/* আপডেটেড loading এবং স্কেলিটন পার্ট */}
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
+            {[...Array(8)].map((_, i) => (
+              <ProductSkeleton key={i} />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
