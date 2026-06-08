@@ -6,8 +6,8 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-neo--mart--peach.vercel.app-blue?style=for-the-badge)](https://neo-mart-peach.vercel.app)
 [![GitHub](https://img.shields.io/badge/GitHub-junaidr04-black?style=for-the-badge&logo=github)](https://github.com/junaidr04)
-
-![NeoMart Banner](https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=400&fit=crop)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?style=for-the-badge&logo=mongodb)](https://mongodb.com)
+[![Stripe](https://img.shields.io/badge/Stripe-Payment-purple?style=for-the-badge&logo=stripe)](https://stripe.com)
 
 </div>
 
@@ -15,31 +15,45 @@
 
 ## 🚀 Overview
 
-**NeoMart** is a fully functional, production-ready MERN stack e-commerce application with a modern UI, complete authentication system, admin panel, and order management. Built from scratch with a focus on performance, security, and user experience.
+**NeoMart** is a fully functional, production-ready MERN stack e-commerce application with modern UI, complete authentication system, Stripe payment gateway, admin panel with analytics, and much more. Built from scratch with a focus on performance, security, and user experience.
 
 > 🔗 **Live:** [neo-mart-peach.vercel.app](https://neo-mart-peach.vercel.app)
-> 📦 **Backend:** [neomart-backend-6yw4.onrender.com](https://neomart-backend-6yw4.onrender.com)
+> 📦 **Backend API:** [neomart-backend-6yw4.onrender.com](https://neomart-backend-6yw4.onrender.com)
 
 ---
 
-## ✨ Key Features
+## ✨ Features
 
 ### 🧑‍💼 User Features
 - ✅ Register & Login with JWT Authentication
-- ✅ Persistent sessions with HTTP-only cookies
-- ✅ Browse products with search & category filter
-- ✅ Product detail pages with full specs
+- ✅ Persistent sessions with HTTP-only cookies + localStorage
+- ✅ Browse products with search & multi-category filter
+- ✅ Product detail pages with full specs & reviews
+- ✅ Star rating & review system ⭐
+- ✅ Wishlist — save favorite products ❤️
 - ✅ Add to Cart, Update Quantity, Remove items
+- ✅ Coupon/Discount code system 🎟️
 - ✅ Checkout with shipping address
-- ✅ Order history & tracking
-- ✅ Dark Mode toggle
-- ✅ Fully responsive (Mobile + Desktop)
+- ✅ Stripe Card Payment 💳
+- ✅ bKash & Nagad payment UI 🟣🟠
+- ✅ Order history & tracking 📦
+- ✅ Change Password & Forgot Password 🔐
+- ✅ Password visibility toggle 👁️
+- ✅ Dark Mode toggle 🌙
+- ✅ Fully responsive — Mobile + Desktop 📱
+- ✅ Toast notifications 🔔
+- ✅ Loading skeleton animations
 
 ### 🛠️ Admin Features
-- ✅ Admin Panel with Products & Orders tabs
+- ✅ Dashboard with Revenue, Orders, Products stats
+- ✅ Revenue trend line chart 📈
+- ✅ Products by category pie chart 🥧
+- ✅ Orders by status bar chart 📊
 - ✅ Add, Edit, Delete products
-- ✅ View all customer orders
-- ✅ Update order status (Pending → Processing → Shipped → Delivered)
+- ✅ View all customer orders with details
+- ✅ Update order status (Pending → Delivered)
+- ✅ Coupon management (Create, Toggle, Delete) 🎟️
+- ✅ Admin-only password change
 
 ---
 
@@ -49,8 +63,11 @@
 |-------|-----------|
 | **Frontend** | React.js, Vite, Tailwind CSS |
 | **Routing** | React Router DOM v6 |
-| **State Management** | Context API (Auth, Cart, Theme) |
+| **State Management** | Context API (Auth, Cart, Theme, Wishlist) |
 | **HTTP Client** | Axios |
+| **Charts** | Recharts |
+| **Notifications** | React Hot Toast |
+| **Payment** | Stripe, bKash UI, Nagad UI |
 | **Backend** | Node.js, Express.js |
 | **Database** | MongoDB Atlas + Mongoose |
 | **Authentication** | JWT + HTTP-only Cookies |
